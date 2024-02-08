@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project( Game LANGUAGES CXX )
 set( TARGET ${PROJECT_NAME} )
-#set(CMAKE_BINARY_DIR build)
+#sset(CMAKE_BINARY_DIR build)
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/debug) 
 
 add_compile_options(-O2 -Wall -Wno-missing-braces)
