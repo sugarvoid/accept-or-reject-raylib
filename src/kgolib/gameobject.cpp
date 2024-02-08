@@ -1,14 +1,11 @@
-#include "GAMEOBJECT_H"
+#include "gameobject.hpp"
 #include "raylib.h"
 #include <iostream>
 
 // Constructor
-GameObject::GameObject(int centerX, int centerY, int size)
+GameObject::GameObject()
 {
-    x = centerX;
-    y = centerY;
-    this->size = size;
-    this->color = GOLD;
+    
 }
 
 // Destructor
@@ -18,6 +15,6 @@ GameObject::~GameObject()
 }
 
 // Other member functions
-virtual GameObject::draw()
+void GameObject::draw()
 {
 }

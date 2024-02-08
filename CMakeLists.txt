@@ -12,6 +12,8 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin )
 set( SOURCE_PATH "${PROJECT_SOURCE_DIR}/src" )
 set( INCLUDE_PATH "${PROJECT_SOURCE_DIR}/include" )
 set( HEADER_PATH "${PROJECT_SOURCE_DIR}/src/header" )
+
+
 set( LIBRARY_PATH "${PROJECT_SOURCE_DIR}/lib/libraylib.a")
 
 
@@ -30,7 +32,7 @@ file( GLOB_RECURSE KGO_HPPS "${KGOLIB_INCLUDE_PATH}/*.hpp" )
 file( GLOB_RECURSE KGO_CPPS "${KGOLIB_SOURCE_PATH}/*.cpp" )
 
 
-add_executable( ${TARGET} ${CPPS} ${KGO_CPPS} ${KGO_HPPS} ${HPPS} ${HPPS2})
+add_executable( ${TARGET} ${CPPS} ${KGO_CPPS} ${HPPS} ${HPPS2} ${KGO_HPPS})
 target_link_libraries(${TARGET} ${LIBRARY_PATH})
 
 
