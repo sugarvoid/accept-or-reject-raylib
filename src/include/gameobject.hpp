@@ -1,16 +1,19 @@
-#ifndef GAMEOBJECT_H
-#define GAMEOBJECT_H
+#ifndef GAMEOBJECT_HPP
+#define GAMEOBJECT_HPP
 
 #include "raylib.h"
 
 class GameObject
 {
 public:
+    Vector2 position;
     int x; // x-coordinate of the square's center
     int y; // y-coordinate of the square's center
+    int size;
+    Color color;
 
     // Constructor
-    GameObject();
+    GameObject(int centerX, int centerY, int size);
 
     // Destructor
     ~GameObject();

@@ -1,4 +1,4 @@
-#include "GAMEOBJECT_H"
+#include "include/gameobject.hpp"
 #include "raylib.h"
 #include <iostream>
 
@@ -18,6 +18,6 @@ GameObject::~GameObject()
 }
 
 // Other member functions
-virtual GameObject::draw()
+void GameObject::draw()
 {
 }

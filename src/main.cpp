@@ -1,6 +1,6 @@
 #include <string>
 #include <iostream>
-#include "header/square.hpp"
+#include "include/square.hpp"
 #include "raylib.h"
 
 void makeSquare()
@@ -28,6 +28,7 @@ int main(void)
         BeginDrawing();
         moPos = GetMousePosition();
         DrawFPS(0, 0);
+
         mySquare.draw();
         ClearBackground(Color({100, 149, 237, 255}));
 

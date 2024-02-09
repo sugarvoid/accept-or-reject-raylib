@@ -1,4 +1,4 @@
-#include "header/square.hpp"
+#include "include/square.hpp"
 #include "raylib.h"
 #include <iostream>
 
