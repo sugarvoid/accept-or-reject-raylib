@@ -30,7 +30,7 @@ file( GLOB_RECURSE KGO_HPPS "${KGOLIB_INCLUDE_PATH}/*.hpp" )
 file( GLOB_RECURSE KGO_CPPS "${KGOLIB_SOURCE_PATH}/*.cpp" )
 
 
-add_executable( ${TARGET} ${CPPS} ${KGO_CPPS} ${KGO_HPPS} ${HPPS} ${HPPS2})
+add_executable( ${TARGET} ${CPPS} ${KGO_CPPS} ${HPPS} ${HPPS2} ${KGO_HPPS})
 target_link_libraries(${TARGET} ${LIBRARY_PATH})
 
 
