@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
 #include "include/square.hpp"
+#include "include/sprite.hpp"
 #include "raylib.h"
 
 void makeSquare()
@@ -20,7 +21,9 @@ int main(void)
 {
     InitWindow(600, 600, "raylib [core] example - basic window");
     SetTargetFPS(60);
+
     Square mySquare(40.0, 40.0, 64.0);
+    Sprite mySprite;
     Vector2 moPos;
 
     while (!WindowShouldClose())
@@ -30,9 +33,10 @@ int main(void)
         DrawFPS(0, 0);
 
         mySquare.draw();
+        mySprite.Draw();
         ClearBackground(Color({100, 149, 237, 255}));
 
-        std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
+        // std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
 
         EndDrawing();
     }

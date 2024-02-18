@@ -15,22 +15,14 @@ set( HEADER_PATH "${PROJECT_SOURCE_DIR}/src/include" )
 set( LIBRARY_PATH "${PROJECT_SOURCE_DIR}/lib/libraylib.a")
 
 
-
-set( KGOLIB_SOURCE_PATH "${PROJECT_SOURCE_DIR}/src/kgolib" )
-set( KGOLIB_INCLUDE_PATH "${PROJECT_SOURCE_DIR}/src/kgolib" )
-
 find_library(libraylib ${LIBRARY_PATH})
-
 
 file( GLOB_RECURSE HPPS "${INCLUDE_PATH}/*.h" )
 file( GLOB_RECURSE HPPS2 "${HEADER_PATH}/*.hpp" )
 file( GLOB_RECURSE CPPS "${SOURCE_PATH}/*.cpp" )
 
-file( GLOB_RECURSE KGO_HPPS "${KGOLIB_INCLUDE_PATH}/*.hpp" )
-file( GLOB_RECURSE KGO_CPPS "${KGOLIB_SOURCE_PATH}/*.cpp" )
 
-
-add_executable( ${TARGET} ${CPPS} ${KGO_CPPS} ${HPPS} ${HPPS2} ${KGO_HPPS})
+add_executable( ${TARGET} ${CPPS} ${HPPS} ${HPPS2})
 target_link_libraries(${TARGET} ${LIBRARY_PATH})
 
 
