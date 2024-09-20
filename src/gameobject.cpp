@@ -1,5 +1,5 @@
-#include "include/gameobject.hpp"
-#include "raylib.h"
+#include "../include/gameobject.hpp"
+#include "../include/raylib.h"
 #include <iostream>
 
 // Constructor

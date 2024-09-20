@@ -28,6 +28,7 @@ public:
     int getCenterX();
     int getCenterY();
     int getSize();
+    Vector2 GetPosition();
 
     //
     void draw();

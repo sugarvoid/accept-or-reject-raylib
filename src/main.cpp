@@ -1,8 +1,9 @@
 #include <string>
 #include <iostream>
-#include "include/square.hpp"
-#include "include/sprite.hpp"
-#include "raylib.h"
+#include "../include/square.hpp"
+#include "../include/Sprite.hpp"
+#include "../include/raylib.h"
+#include "../include/Node2d.h"
 
 void makeSquare()
 {
@@ -21,6 +22,18 @@ int main(void)
 {
     InitWindow(600, 600, "raylib [core] example - basic window");
     SetTargetFPS(60);
+    Image icon = LoadImage("raylib_logo.png");
+
+    if (!icon.data)
+    {
+        std::cout << "Failed to load icon" << std::endl;
+    }
+
+    SetWindowIcon(icon);
+
+    Node2D player; 
+
+    std::cout << "Test Node2d " << player.GetName() << std::endl;
 
     Square mySquare(40.0, 40.0, 64.0);
     Sprite mySprite;
@@ -37,11 +50,12 @@ int main(void)
         mySprite.Draw();
         ClearBackground(Color({100, 149, 237, 255}));
 
-        //std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
+        // std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
 
         EndDrawing();
     }
 
+    UnloadImage(icon); // Needed if continuously loaded.
     CloseWindow();
 
     return 0;

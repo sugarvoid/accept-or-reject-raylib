@@ -2,9 +2,13 @@
 #define SPRITE_H
 
 #include "raylib.h"
+#include "../include/Node2d.h"
 
-class Sprite
+class Sprite : Node2D
 {
+protected:
+    int frames;
+    int frame;
 public:
     // Constructor
     Sprite();
@@ -13,6 +17,7 @@ public:
     ~Sprite();
 
     void Draw();
+    void GoToFrame(int newFrame);
 };
 
 #endif

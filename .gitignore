@@ -51,6 +51,8 @@ gen/
 out/
 build/
 
+game
+
 
 !lib/
 !lib/*a

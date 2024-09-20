@@ -1,7 +1,7 @@
 #ifndef GAMEOBJECT_HPP
 #define GAMEOBJECT_HPP
 
-#include "raylib.h"
+#include "../include/raylib.h"
 
 class GameObject
 {

@@ -1,28 +1,35 @@
 # Define variables for compiler and flags
-CXX = g++
-CXXFLAGS = -O2 -Wall -Wno-missing-braces
-INCLUDES = -I./include/ -I./src/header/
-LIBS = -L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+CC = g++
+COMPILER_FLAGS = -O2 -Wall -Wno-missing-braces
+LINKER_FLAGS = -L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+
 
 # Define source and object files
 SRCS = $(wildcard src/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 
+
+### Define source and object files
+###OBJS = $(wildcard src/*.cpp)
+
+
+
 # Define the target executable
-TARGET = Game
+TARGET = game
 
-# Rule to build the target
+all : $(TARGET)
+# Build target executable from object files
 $(TARGET): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OBJS) $(LIBS) -o $@
+	$(CC) $(OBJS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(TARGET)
 
-# Rule to compile source files into object files
+# Compile .cpp files into .o files
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(COMPILER_FLAGS) $(INCLUDE_FLAGS) -c $< -o $@
 
 # Clean up build artifacts
 clean:
-	rm -f $(TARGET) $(OBJS)
+	rm -f $(OBJS) $(TARGET)
 
-# Declare the default target
-.PHONY: all clean
-all: $(TARGET)
+# Rebuild: clean and then build
+rebuild: clean all
+

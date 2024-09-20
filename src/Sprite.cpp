@@ -1,4 +1,4 @@
-#include "include/sprite.hpp"
+#include "../include/Sprite.hpp"
 
 Sprite::Sprite(/* args */)
 {

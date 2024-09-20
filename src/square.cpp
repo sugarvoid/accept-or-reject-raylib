@@ -1,6 +1,7 @@
-#include "include/square.hpp"
-#include "raylib.h"
+#include "../include/square.hpp"
 #include <iostream>
+
+
 
 // Constructor
 Square::Square(int centerX, int centerY, int size)
@@ -8,7 +9,7 @@ Square::Square(int centerX, int centerY, int size)
     x = centerX;
     y = centerY;
     this->size = size;
-    this->color = GOLD;
+    this->color = GREEN;
     this->position.x = 0;
 }
 
@@ -16,6 +17,7 @@ Square::Square(int centerX, int centerY, int size)
 Square::~Square()
 {
     // Destructor implementation (if needed)
+    std::cout << "Square was deleted" << std::endl;
 }
 
 // Setter functions
@@ -69,4 +71,9 @@ void Square::update()
 void wasClicked()
 {
     std::cout << "Square was clicked" << std::endl;
+}
+
+Vector2 Square::GetPosition()
+{
+    return this->position;
 }
