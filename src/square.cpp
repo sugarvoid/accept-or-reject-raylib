@@ -9,6 +9,7 @@ Square::Square(int centerX, int centerY, int size)
     y = centerY;
     this->size = size;
     this->color = GOLD;
+    this->position.x = 0;
 }
 
 // Destructor
@@ -54,6 +55,15 @@ void Square::draw()
 {
     DrawRectangle(this->x, this->y, this->size, this->size, this->color);
     // DrawRectangle(screenWidth/4*2 - 60, 100, 120, 60, RED);
+}
+
+void Square::update()
+{   
+    //std::cout << "updating" << std::endl;
+    if (IsKeyDown(KEY_RIGHT)) this->x += 2.0f;
+    if (IsKeyDown(KEY_LEFT)) this->x -= 2.0f;
+    if (IsKeyDown(KEY_UP)) this->y -= 2.0f;
+    if (IsKeyDown(KEY_DOWN)) this->y += 2.0f;
 }
 
 void wasClicked()

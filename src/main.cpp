@@ -32,11 +32,12 @@ int main(void)
         moPos = GetMousePosition();
         DrawFPS(0, 0);
 
+        mySquare.update();
         mySquare.draw();
         mySprite.Draw();
         ClearBackground(Color({100, 149, 237, 255}));
 
-        // std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
+        //std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
 
         EndDrawing();
     }

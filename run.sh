@@ -1,2 +1,3 @@
+rm Game
 make
-./bin/Game
+./Game
