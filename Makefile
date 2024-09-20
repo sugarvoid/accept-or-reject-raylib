@@ -26,6 +26,9 @@ $(TARGET): $(OBJS)
 %.o: %.cpp
 	$(CC) $(COMPILER_FLAGS) $(INCLUDE_FLAGS) -c $< -o $@
 
+# Declare clean and rebuild as phony targets
+.PHONY: clean rebuild
+
 # Clean up build artifacts
 clean:
 	rm -f $(OBJS) $(TARGET)

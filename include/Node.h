@@ -12,12 +12,14 @@ public:
     Node();
     ~Node();
 
-    std::string GetName();
+    char* GetName();
 
 
 protected:
     Vector2 position;
-    std::string name;
+    float rotation; 
+    Vector2 scale; 
+    char* name;
 };
 
 
