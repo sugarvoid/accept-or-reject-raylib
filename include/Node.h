@@ -3,7 +3,7 @@
 #define NODE_H
 
 #include <vector>
-#include "../include/raymath.h"
+#include "raylib/raylib.h"
 #include <string>
 
 class Node

@@ -2,8 +2,8 @@
 #ifndef SQUARE_H
 #define SQUARE_H
 
-#include "raylib.h"
-#include "raymath.h"
+#include "raylib/raylib.h"
+#include "raylib/raymath.h"
 
 class Square
 {

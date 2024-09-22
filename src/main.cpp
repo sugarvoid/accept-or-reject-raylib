@@ -2,14 +2,20 @@
 #include <iostream>
 #include "../include/square.hpp"
 #include "../include/Sprite.hpp"
-#include "../include/raylib.h"
+#include "../include/raylib/raylib.h"
 #include "../include/Node2d.h"
+#include "../include/box2d/box2d.h"
 
 void makeSquare()
 {
     // Create a new square object using the constructor
     Square mySquare(0.0, 0.0, 5.0); // Center at (0,0) and size of 5.0
 
+    // Realistic gravity is achieved by multiplying gravity by the length unit.
+	
+    b2WorldDef worldDef = b2DefaultWorldDef();
+    worldDef.gravity.y = 10.0f;
+	b2WorldId worldId = b2CreateWorld(&worldDef);
     // Use setter functions to modify the square's properties
     mySquare.setCenterX(2.0);
     mySquare.setCenterY(3.0);
@@ -44,6 +50,8 @@ int main(void)
         BeginDrawing();
         moPos = GetMousePosition();
         DrawFPS(0, 0);
+
+        
 
         mySquare.update();
         mySquare.draw();

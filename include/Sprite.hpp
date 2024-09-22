@@ -1,7 +1,7 @@
 #ifndef SPRITE_H
 #define SPRITE_H
 
-#include "raylib.h"
+#include "raylib/raylib.h"
 #include "../include/Node2d.h"
 
 class Sprite : Node2D

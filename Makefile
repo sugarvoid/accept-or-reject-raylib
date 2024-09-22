@@ -1,7 +1,7 @@
 # Define variables for compiler and flags
 CC = g++
 COMPILER_FLAGS = -O2 -Wall -Wno-missing-braces
-LINKER_FLAGS = -L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+LINKER_FLAGS = -L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11
 
 
 # Define source and object files
