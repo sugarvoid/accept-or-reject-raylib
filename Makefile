@@ -1,13 +1,12 @@
 # Define variables for compiler and flags
-CC = g++
+CC = gcc
 COMPILER_FLAGS = -O2 -Wall -Wno-missing-braces
-LINKER_FLAGS = -L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+LINKER_FLAGS = -L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11
 
 
 # Define source and object files
-SRCS = $(wildcard src/*.cpp)
-OBJS = $(SRCS:.cpp=.o)
-
+SRCS = $(wildcard src/*.c)
+OBJS = $(SRCS:.c=.o)
 
 ### Define source and object files
 ###OBJS = $(wildcard src/*.cpp)
