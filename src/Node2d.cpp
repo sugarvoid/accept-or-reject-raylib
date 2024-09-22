@@ -1,7 +1,11 @@
 #include "../include/Node2d.h"
 
-Node2D::Node2D(/* args */)
+const std::string NAME = "Player";
+
+Node2D::Node2D()
+    : Node()
 {
+    this->name = NAME;
     this->name = "Player";
 }
 

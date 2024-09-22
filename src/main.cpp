@@ -38,9 +38,7 @@ int main(void)
     SetWindowIcon(icon);
 
     Node2D player; 
-
-    std::cout << "Test Node2d " << player.GetName() << std::endl;
-
+    std::cout << "Player Name: " << player.GetName() << std::endl;
     Square mySquare(40.0, 40.0, 64.0);
     Sprite mySprite;
     Vector2 moPos;

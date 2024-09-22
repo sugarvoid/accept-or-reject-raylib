@@ -1,7 +1,8 @@
 #include "../include/Node.h"
-//#include <string>
+#include <string>
 
-Node::Node() 
+Node::Node()
+    : name("Default")
 { 
     this->scale.x = 1; 
     this->scale.y = 1; 
@@ -14,6 +15,6 @@ Node::~Node()
     
 }
 
-char* Node::GetName() {
+std::string Node::GetName() {
     return this->name;
 }
