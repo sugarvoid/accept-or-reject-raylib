@@ -5,7 +5,7 @@ const std::string NAME = "Player";
 Node2D::Node2D()
     : Node()
 {
-    this->name = NAME;
+    //this->name = NAME;
     this->name = "Player";
 }
 

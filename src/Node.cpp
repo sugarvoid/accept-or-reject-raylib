@@ -1,5 +1,6 @@
 #include "../include/Node.h"
 #include <string>
+#include <iostream>
 
 Node::Node()
     : name("Default")
@@ -12,7 +13,7 @@ Node::Node()
 
 Node::~Node()
 {
-    
+    std::cout << this << " was deleted" << std::endl;
 }
 
 std::string Node::GetName() {

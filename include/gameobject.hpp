@@ -1,5 +1,5 @@
-#ifndef GAMEOBJECT_HPP
-#define GAMEOBJECT_HPP
+#ifndef GAMEOBJECT_H
+#define GAMEOBJECT_H
 
 #include "../include/raylib/raylib.h"
 
