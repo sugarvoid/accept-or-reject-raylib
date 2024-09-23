@@ -9,6 +9,7 @@ class Sprite : Node2D
 protected:
     int frames;
     int frame;
+    Texture2D texture; 
 public:
     // Constructor
     Sprite();

@@ -62,10 +62,10 @@ void Square::draw()
 void Square::update()
 {   
     //std::cout << "updating" << std::endl;
-    if (IsKeyDown(KEY_RIGHT)) this->x += 2.0f;
-    if (IsKeyDown(KEY_LEFT)) this->x -= 2.0f;
-    if (IsKeyDown(KEY_UP)) this->y -= 2.0f;
-    if (IsKeyDown(KEY_DOWN)) this->y += 2.0f;
+    if (IsKeyDown(KEY_RIGHT)) this->x += 1.0f;
+    if (IsKeyDown(KEY_LEFT)) this->x -= 1.0f;
+    if (IsKeyDown(KEY_UP)) this->y -= 1.0f;
+    if (IsKeyDown(KEY_DOWN)) this->y += 1.0f;
 }
 
 void wasClicked()
