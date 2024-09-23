@@ -52,60 +52,72 @@ int main(void)
     Sprite mySprite;
     Vector2 moPos;
 
+
+    // Store previous window size and scaling factors
+    int prevWindowWidth = GetScreenWidth();
+    int prevWindowHeight = GetScreenHeight();
+    float scale = 1.0f;
+    int scaledWidth = gameWidth;
+    int scaledHeight = gameHeight;
+    int offsetX = 0;
+    int offsetY = 0;
+
+    // Initial calculation of scaling factor
+    scale = fminf((float)prevWindowWidth / gameWidth, (float)prevWindowHeight / gameHeight);
+    scaledWidth = (int)(gameWidth * scale);
+    scaledHeight = (int)(gameHeight * scale);
+    offsetX = (prevWindowWidth - scaledWidth) / 2;
+    offsetY = (prevWindowHeight - scaledHeight) / 2;
+
     while (!WindowShouldClose())
     {
+        int currentWindowWidth = GetScreenWidth();
+        int currentWindowHeight = GetScreenHeight();
+
+        // Recalculate scaling only if the window size has changed
+        if (currentWindowWidth != prevWindowWidth || currentWindowHeight != prevWindowHeight) {
+            prevWindowWidth = currentWindowWidth;
+            prevWindowHeight = currentWindowHeight;
+
+            scale = fminf((float)currentWindowWidth / gameWidth, (float)currentWindowHeight / gameHeight);
+            scaledWidth = (int)(gameWidth * scale);
+            scaledHeight = (int)(gameHeight * scale);
+            offsetX = (currentWindowWidth - scaledWidth) / 2;
+            offsetY = (currentWindowHeight - scaledHeight) / 2;
+        }
 
         // Begin drawing to the render texture (128x128)
 
         BeginTextureMode(target);
 
-        ClearBackground(RAYWHITE);
+        //ClearBackground(RAYWHITE);
+        ClearBackground(Color({100, 149, 237, 255}));
         moPos = GetMousePosition();
 
         mySquare.update();
         mySquare.draw();
         mySprite.Draw();
-        ClearBackground(Color({100, 149, 237, 255}));
+
+        //DrawText("FPS: ", 0, 0, 1, BLACK);
+        
 
         // Your game drawing logic here
 
         EndTextureMode();
 
-        // Get the size of the actual window
-
-        int windowWidth = GetScreenWidth();
-
-        int windowHeight = GetScreenHeight();
-
-        // Calculate the scaling factor while preserving the aspect ratio
-
-        float scale = fminf((float)windowWidth / gameWidth, (float)windowHeight / gameHeight);
-
-        int scaledWidth = (int)(gameWidth * scale);
-
-        int scaledHeight = (int)(gameHeight * scale);
-
-        int offsetX = (windowWidth - scaledWidth) / 2;
-
-        int offsetY = (windowHeight - scaledHeight) / 2;
+        
 
         // Begin drawing to the real window
-
         BeginDrawing();
-
         ClearBackground(BLACK); // Clear to black to avoid letterboxing artifacts
-
         // std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
-
         // Draw the scaled 128x128 game texture to the window, preserving aspect ratio
-
         DrawTexturePro(target.texture,
                        (Rectangle){0, 0, (float)target.texture.width, -(float)target.texture.height}, // Flip vertically
                        (Rectangle){offsetX, offsetY, scaledWidth, scaledHeight},
                        (Vector2){0, 0}, 0.0f, WHITE);
 
-        DrawFPS(0, 0);
-
+        DrawFPS(offsetX, offsetY);
         EndDrawing();
     }
 
