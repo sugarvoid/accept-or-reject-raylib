@@ -13,16 +13,11 @@ const int gameHeight = 128;
 void makeSquare()
 {
     // Create a new square object using the constructor
-    Square mySquare(0.0, 0.0, 5.0); // Center at (0,0) and size of 5.0
-
-    // Realistic gravity is achieved by multiplying gravity by the length unit.
-
-    // Use setter functions to modify the square's properties
+    Square mySquare(0.0, 0.0, 8.0); 
     mySquare.setCenterX(2.0);
     mySquare.setCenterY(3.0);
     mySquare.setSize(8.0);
 
-    // Display updated information about the square
 }
 
 int main(void)
@@ -51,6 +46,7 @@ int main(void)
     Square mySquare(0, 0, 8.0);
     Sprite mySprite;
     Vector2 moPos;
+    Vector2 localMousePos; 
 
 
     // Store previous window size and scaling factors
@@ -90,9 +86,11 @@ int main(void)
 
         BeginTextureMode(target);
 
-        //ClearBackground(RAYWHITE);
+        //ClearBackground(SKYBLUE);
         ClearBackground(Color({100, 149, 237, 255}));
         moPos = GetMousePosition();
+        localMousePos.x = (moPos.x - offsetX)/scale;
+        localMousePos.y = (moPos.y - offsetY)/scale;
 
         mySquare.update();
         mySquare.draw();
@@ -110,7 +108,7 @@ int main(void)
         // Begin drawing to the real window
         BeginDrawing();
         ClearBackground(BLACK); // Clear to black to avoid letterboxing artifacts
-        // std::cout << "Mouse Position: (" << moPos.x << ", " << moPos.y << ")" << std::endl;
+        std::cout << "Mouse Position: (" << localMousePos.x << ", " << localMousePos.y << ")" << std::endl;
         // Draw the scaled 128x128 game texture to the window, preserving aspect ratio
         DrawTexturePro(target.texture,
                        (Rectangle){0, 0, (float)target.texture.width, -(float)target.texture.height}, // Flip vertically
@@ -122,10 +120,8 @@ int main(void)
     }
 
     // Unload resources
-
     UnloadRenderTexture(target);
-
-    UnloadImage(icon); // Needed if continuously loaded.
+    UnloadImage(icon);
     CloseWindow();
 
     return 0;
