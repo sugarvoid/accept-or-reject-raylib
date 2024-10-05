@@ -4,7 +4,7 @@
 #include "raylib/raylib.h"
 #include "../include/Node2d.h"
 
-class Sprite : Node2D
+class Sprite : public Node2D
 {
 protected:
     int frames;

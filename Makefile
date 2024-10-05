@@ -9,11 +9,6 @@ SRCS = $(wildcard src/*.cpp)
 OBJS = $(SRCS:.cpp=.o)
 
 
-### Define source and object files
-###OBJS = $(wildcard src/*.cpp)
-
-
-
 # Define the target executable
 TARGET = game
 

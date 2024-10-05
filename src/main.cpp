@@ -23,7 +23,7 @@ void makeSquare()
 int main(void)
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(600, 600, "raylib [core] example - basic window");
+    InitWindow(600, 600, "raylib - basic window");
 
     SetTargetFPS(60);
     Image icon = LoadImage("raylib_logo.png");
@@ -108,7 +108,7 @@ int main(void)
         // Begin drawing to the real window
         BeginDrawing();
         ClearBackground(BLACK); // Clear to black to avoid letterboxing artifacts
-        std::cout << "Mouse Position: (" << localMousePos.x << ", " << localMousePos.y << ")" << std::endl;
+        // std::cout << "Mouse Position: (" << localMousePos.x << ", " << localMousePos.y << ")" << std::endl;
         // Draw the scaled 128x128 game texture to the window, preserving aspect ratio
         DrawTexturePro(target.texture,
                        (Rectangle){0, 0, (float)target.texture.width, -(float)target.texture.height}, // Flip vertically
