@@ -4,7 +4,7 @@
 #include "../include/player.h"
 #include "../include/raylib/raylib.h"
 #include "../include/Node2d.h"
-#include "../include/box2d/box2d.h"
+//#include "../include/box2d/box2d.h"
 
 const int gameWidth = 128;
 const int gameHeight = 128;
@@ -24,9 +24,9 @@ int main(void)
     SetTargetFPS(60);
     Image icon = LoadImage("raylib_logo.png");
 
-    b2WorldDef worldDef = b2DefaultWorldDef();
-    worldDef.gravity.y = 10.0f;
-    b2WorldId worldId = b2CreateWorld(&worldDef);
+    //b2WorldDef worldDef = b2DefaultWorldDef();
+    //worldDef.gravity.y = 10.0f;
+    //b2WorldId worldId = b2CreateWorld(&worldDef);
 
     RenderTexture2D target = LoadRenderTexture(gameWidth, gameHeight);
 

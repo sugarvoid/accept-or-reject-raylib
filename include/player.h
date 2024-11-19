@@ -2,7 +2,6 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include "Node.h"
 #include "raylib/raylib.h"
 #include <string>
 
@@ -15,8 +14,7 @@ private:
     Vector2 position; 
     int width;
     int height;
-    float jumpForce;
-    bool canJump;
+    bool isShooting;
 
 
 public:

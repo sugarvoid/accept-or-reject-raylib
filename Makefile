@@ -5,7 +5,9 @@ LINKER_FLAGS = -L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11
 
 
 # Define source and object files
-SRCS = $(wildcard src/*.cpp)
+SRCS = 	src/main.cpp \
+		src/player.cpp 
+		
 OBJS = $(SRCS:.cpp=.o)
 
 
