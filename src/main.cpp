@@ -13,6 +13,13 @@ int main(void)
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(600, 600, "raylib - basic window");
+    
+
+    Camera2D camera = { 0 };
+    camera.target = (Vector2){ 20.0f, 20.0f };
+    camera.offset = (Vector2){ 400/2.0f, 400/2.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
 
     SetTargetFPS(60);
     Image icon = LoadImage("raylib_logo.png");
