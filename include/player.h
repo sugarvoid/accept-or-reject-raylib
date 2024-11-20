@@ -1,28 +1,21 @@
-#pragma once
 #ifndef PLAYER_H
 #define PLAYER_H
 
 #include "raylib/raylib.h"
-#include <string>
 
-class Player 
+typedef struct Player
 {
-protected:
-private:
-    /* data */
-    Texture2D texture; 
-    Vector2 position; 
+    Texture2D texture;
+    Vector2 position;
     int width;
     int height;
     bool isShooting;
+} Player;
 
+Player Player_Create();
+void Player_Destroy(Player *p);
+void Player_CleanUp(Player *p);
+void Player_Draw(const Player *p);
+void Player_Update(Player *p, float dt);
 
-public:
-    Player();
-    ~Player();
-    void CleanUp();
-    void Draw();
-    void Update(float dt);
-};
-
-#endif
+#endif // PLAYER_H

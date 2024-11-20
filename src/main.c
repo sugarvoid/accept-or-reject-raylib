@@ -1,10 +1,11 @@
-#include <string>
-#include <iostream>
+#include <string.h> // For string manipulation (e.g., strcpy, strlen)
+#include <stdio.h>  // For input/output (e.g., printf, scanf)
 
 #include "../include/player.h"
 #include "../include/raylib/raylib.h"
-#include "../include/Node2d.h"
-//#include "../include/box2d/box2d.h"
+#include "../include/raylib/raymath.h"
+
+// #include "../include/box2d/box2d.h"
 
 const int gameWidth = 128;
 const int gameHeight = 128;
@@ -13,31 +14,31 @@ int main(void)
 {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(600, 600, "raylib - basic window");
-    
 
-    Camera2D camera = { 0 };
-    camera.target = (Vector2){ 20.0f, 20.0f };
-    camera.offset = (Vector2){ 400/2.0f, 400/2.0f };
+    Camera2D camera = {0};
+    camera.target = (Vector2){20.0f, 20.0f};
+    camera.offset = (Vector2){400 / 2.0f, 400 / 2.0f};
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
     SetTargetFPS(60);
     Image icon = LoadImage("raylib_logo.png");
 
-    //b2WorldDef worldDef = b2DefaultWorldDef();
-    //worldDef.gravity.y = 10.0f;
-    //b2WorldId worldId = b2CreateWorld(&worldDef);
+    // b2WorldDef worldDef = b2DefaultWorldDef();
+    // worldDef.gravity.y = 10.0f;
+    // b2WorldId worldId = b2CreateWorld(&worldDef);
 
     RenderTexture2D target = LoadRenderTexture(gameWidth, gameHeight);
 
     if (!icon.data)
     {
-        std::cout << "Failed to load icon" << std::endl;
+        printf("Failed to load icon");
     }
 
     SetWindowIcon(icon);
 
-    Player player;
+    // Player player;
+    Player player = Player_Create();
     // std::cout << "Player Name: " << player->GetName() << std::endl;
     Vector2 moPos;
     Vector2 localMousePos;
@@ -80,15 +81,17 @@ int main(void)
 
         BeginTextureMode(target);
 
-        //ClearBackground(BLACK);
-        //ClearBackground(Color({100, 149, 237, 255}));
-        ClearBackground(Color({31,31,31,255}));
+        // ClearBackground(BLACK);
+        // ClearBackground(Color({100, 149, 237, 255}));
+        ClearBackground(DARKGREEN);
         moPos = GetMousePosition();
         localMousePos.x = (moPos.x - offsetX) / scale;
         localMousePos.y = (moPos.y - offsetY) / scale;
 
-        player.Draw();
-        player.Update(GetTime());
+        // player.Draw();
+        Player_Draw(&player);
+        Player_Update(&player, GetTime());
+        // player.Update(GetTime());
 
         // DrawText("FPS: ", 0, 0, 1, BLACK);
 
@@ -111,7 +114,7 @@ int main(void)
     }
 
     // Unload resources
-    player.CleanUp();
+    Player_CleanUp(&player);
     UnloadRenderTexture(target);
     UnloadImage(icon);
     CloseWindow();

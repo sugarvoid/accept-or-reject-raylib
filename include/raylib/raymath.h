@@ -186,7 +186,8 @@ RMAPI float Clamp(float value, float min, float max)
 
 // Calculate linear interpolation between two floats
 RMAPI float Lerp(float start, float end, float amount)
-{screenWidthat result = start + amount*(end - start);
+{
+    float result = start + amount*(end - start);
 
     return result;
 }
@@ -249,7 +250,23 @@ RMAPI Vector2 Vector2One(void)
 
 // Add two vectors (v1 + v2)
 RMAPI Vector2 Vector2Add(Vector2 v1, Vector2 v2)
-{screenWidth
+{
+    Vector2 result = { v1.x + v2.x, v1.y + v2.y };
+
+    return result;
+}
+
+// Add vector and float value
+RMAPI Vector2 Vector2AddValue(Vector2 v, float add)
+{
+    Vector2 result = { v.x + add, v.y + add };
+
+    return result;
+}
+
+// Subtract two vectors (v1 - v2)
+RMAPI Vector2 Vector2Subtract(Vector2 v1, Vector2 v2)
+{
     Vector2 result = { v1.x - v2.x, v1.y - v2.y };
 
     return result;

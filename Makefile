@@ -1,14 +1,14 @@
 # Define variables for compiler and flags
-CC = g++
+CC = gcc
 COMPILER_FLAGS = -O2 -Wall -Wno-missing-braces
 LINKER_FLAGS = -L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11
 
 
 # Define source and object files
-SRCS = 	src/main.cpp \
-		src/player.cpp 
+SRCS = 	src/main.c \
+		src/player.c 
 		
-OBJS = $(SRCS:.cpp=.o)
+OBJS = $(SRCS:.c=.o)
 
 
 # Define the target executable
