@@ -3,13 +3,12 @@
 
 #include "raylib/raylib.h"
 
-typedef struct Player
-{
-    Texture2D texture;
-    Vector2 position;
-    int width;
-    int height;
-    bool isShooting;
+typedef struct Player {
+  Texture2D texture;
+  Vector2 position;
+  int width;
+  int height;
+  bool isShooting;
 } Player;
 
 Player Player_Create();
