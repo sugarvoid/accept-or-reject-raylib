@@ -172,7 +172,7 @@ int main(void) {
              "raylib [textures] example - bunnymark");
 
   // Load bunny texture
-  Texture2D texBunny = LoadTexture("wabbit_alpha.png");
+  Texture2D texBunny = LoadTexture("res/wabbit_alpha.png");
 
   Bunny *bunnies =
       (Bunny *)malloc(MAX_BUNNIES * sizeof(Bunny)); // Bunnies array
