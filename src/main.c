@@ -143,7 +143,14 @@
  ********************************************************************************************/
 
 #include "../include/raylib/raylib.h"
-// // #include "../include/raylib/raymath.h"
+#include "../include/raylib/raymath.h"
+#include "../include/player.h"
+#include "../include/bullet.h"
+#include "../include/raylib/raylib.h"
+// #include "../include/raylib/raymath.h"
+#include "math.h"
+
+// #include "../include/box2d/box2d.h"
 
 #include <stdlib.h> // Required for: malloc(), free()
 
@@ -170,6 +177,9 @@ int main(void) {
 
   InitWindow(screenWidth, screenHeight,
              "raylib [textures] example - bunnymark");
+
+             // Player player;
+  Player player = Player_Create();
 
   // Load bunny texture
   Texture2D texBunny = LoadTexture("res/wabbit_alpha.png");
@@ -222,7 +232,7 @@ int main(void) {
     //----------------------------------------------------------------------------------
     BeginDrawing();
 
-    ClearBackground(RAYWHITE);
+    ClearBackground(BLACK);
 
     for (int i = 0; i < bunniesCount; i++) {
       // NOTE: When internal batch buffer limit is reached (MAX_BATCH_ELEMENTS),
@@ -233,11 +243,14 @@ int main(void) {
       // while new data is tried to be sent (updating current in-use buffers) it
       // could generates a stall and consequently a frame drop, limiting the
       // number of drawn bunnies
-      DrawTexture(texBunny, (int)bunnies[i].position.x,
-                  (int)bunnies[i].position.y, bunnies[i].color);
+      DrawCircleLines((int)bunnies[i].position.x, (int)bunnies[i].position.y, 8.0f, RED);
+      //DrawTexture(texBunny, (int)bunnies[i].position.x,
+                  //(int)bunnies[i].position.y, bunnies[i].color);
     }
 
     DrawRectangle(0, 0, screenWidth, 40, BLACK);
+    Player_Draw(&player);
+    Player_Update(&player, GetFrameTime());
     DrawText(TextFormat("bunnies: %i", bunniesCount), 120, 10, 20, GREEN);
     DrawText(TextFormat("batched draw calls: %i",
                         1 + bunniesCount / MAX_BATCH_ELEMENTS),
@@ -252,6 +265,7 @@ int main(void) {
   // De-Initialization
   //--------------------------------------------------------------------------------------
   free(bunnies); // Unload bunnies data array
+  Player_CleanUp(&player);
 
   UnloadTexture(texBunny); // Unload bunny texture
 

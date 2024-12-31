@@ -7,7 +7,9 @@ typedef struct Player {
   Texture2D texture;
   Vector2 position;
   int width;
+  int health;
   int height;
+  float speed;
   bool isShooting;
 } Player;
 

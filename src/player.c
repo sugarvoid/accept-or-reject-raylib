@@ -12,8 +12,9 @@ Player Player_Create()
     }
 
     p.position = (Vector2){50, 50};
-    p.width = 8;
-    p.height = 8;
+    p.speed = 200.0f;
+    p.width = 20;
+    p.height = 20;
     p.isShooting = false; // 0; // false
     return p;
 }
@@ -38,20 +39,22 @@ void Player_Destroy(Player *p)
 
 void Player_Draw(const Player *p)
 {
-    DrawRectangle(p->position.x, p->position.y, p->width, p->height, RAYWHITE);
+    DrawRectangleLines(p->position.x, p->position.y, p->width, p->height, GREEN);
+    DrawRectangleLines(p->position.x, p->position.y - 5, p->width-6, p->height-6, GREEN);
 }
 
 void Player_Update(Player *p, float dt)
 {
+    TraceLog(LOG_INFO, TextFormat("DT: %f", dt));
     // Movement controls
     if (IsKeyDown(KEY_D))
-        p->position.x += 1.0f;
+        p->position.x += (p->speed * dt);
     if (IsKeyDown(KEY_A))
-        p->position.x -= 1.0f;
+        p->position.x -= (p->speed * dt);
     if (IsKeyDown(KEY_W))
-        p->position.y -= 1.0f;
+        p->position.y -= (p->speed * dt);
     if (IsKeyDown(KEY_S))
-        p->position.y += 1.0f;
+        p->position.y += (p->speed * dt);
 
     // Shooting directions
     if (IsKeyDown(KEY_RIGHT))
