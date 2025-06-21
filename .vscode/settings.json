@@ -50,6 +50,9 @@
 		"cinttypes": "cpp",
 		"typeinfo": "cpp",
 		"stdio.h": "c",
-		"raylib.h": "c"
+		"raylib.h": "c",
+		"rcamera.h": "c",
+		"stdbool.h": "c",
+		"stdlib.h": "c"
 	}
 }
