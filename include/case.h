@@ -19,8 +19,7 @@ typedef struct {
     bool hovered;   // If the mouse is hovering over the case
     bool picked;    // If the case has been selected
     bool visible;   // If the case is visible or hidden
-    Color col;      // Color of the case
-    Color hover_col; // Hover color of the case
+    bool opened;
     Vector2 txt_pos; // Position of the text inside the case
     int move_t;      // Animation duration for case movement (optional)
     Vector2 end_loc; // End location (optional for animation)

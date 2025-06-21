@@ -1,3 +1,211 @@
+
+#include <stdlib.h>
+#include "../include/raylib/raylib.h"
+#include "../include/raylib/raymath.h"
+#include "../include/button.h"
+#include "../include/case.h"
+
+#define MAX_COLORS_COUNT 23 // Number of colors available
+#define NUM_CASES 24        // Example number of cases
+#define NUM_ROWS 4
+#define NUM_COLS 6
+#define CASE_WIDTH 100
+#define CASE_HEIGHT 50
+#define GAP_X 1 // Horizontal gap between cases
+#define GAP_Y 5 // Vertical gap between rows and above
+
+typedef enum
+{
+  TITLE,
+  GAME,
+  GAMEOVER
+} GameState;
+
+void StartGame() { TraceLog(LOG_INFO, "Start Game"); }
+
+//------------------------------------------------------------------------------------
+// Program main entry point
+//------------------------------------------------------------------------------------
+int main(void)
+{
+  // Initialization
+  //--------------------------------------------------------------------------------------
+  const int screenWidth = 800;
+  const int screenHeight = 450;
+
+  int banner_x = 0;
+
+  InitWindow(screenWidth, screenHeight, "Accept Or Reject");
+
+  SetTraceLogLevel(LOG_ALL);
+
+  // Colors to choose from
+  // Color colors[MAX_COLORS_COUNT] = {
+  //     RAYWHITE,  YELLOW,    GOLD,   ORANGE,     PINK,    RED,
+  //     MAROON,    GREEN,     LIME,   DARKGREEN,  SKYBLUE, BLUE,
+  //     DARKBLUE,  PURPLE,    VIOLET, DARKPURPLE, BEIGE,   BROWN,
+  //     DARKBROWN, LIGHTGRAY, GRAY,   DARKGRAY,   BLACK};
+
+  Case *cases[NUM_CASES];
+  // Create a case (e.g., number 1, value 100, position (100, 100))
+
+  Button *btn_play = button_new("Play", 300, 350, StartGame, RED);
+
+  // Initialize multiple cases in 4 rows and 6 columns with gaps
+  for (int i = 0; i < NUM_CASES; i++)
+  {
+    // Calculate the row and column
+    int row = i / NUM_COLS; // Integer division (gives row index)
+    int col = i % NUM_COLS; // Modulo operation (gives column index)
+
+    // Calculate the x and y positions based on row and column with gaps
+    int x = 20 + (col * (CASE_WIDTH + GAP_X));  // Add GAP_X between cases
+    int y = 50 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
+
+    // Create a new case with the calculated position
+    cases[i] = case_new(i + 1, (i + 1) * 100, x, y);
+  }
+
+  // Define colorsRecs data (for every rectangle)
+
+
+
+  // Create a RenderTexture2D to use as a canvas
+  // RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
+
+  // Clear render texture before entering the game loop
+  // BeginTextureMode(target);
+  // ClearBackground(RAYWHITE);
+  // EndTextureMode();
+
+  SetTargetFPS(60); // Set our game to run at 120 frames-per-second
+  //--------------------------------------------------------------------------------------
+
+  // Main game loop
+  while (!WindowShouldClose()) // Detect window close button or ESC key
+  {
+    banner_x++;
+    if (banner_x >= screenWidth) {
+      banner_x = -100;
+    }
+
+    // Update
+    //----------------------------------------------------------------------------------
+    Vector2 mousePos = GetMousePosition();
+    // Update each case
+    for (int i = 0; i < NUM_CASES; i++)
+    {
+      case_update(cases[i], mousePos);
+
+      // Check if the case was clicked
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered)
+      {
+        case_was_clicked(cases[i]);
+      }
+    }
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+      TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x, mousePos.y));
+      if (btn_play->is_hovered)
+      {
+        button_was_clicked(btn_play);
+      }
+    }
+
+    button_update(btn_play, mousePos);
+
+
+
+
+
+    //----------------------------------------------------------------------------------
+
+    // Draw
+    //----------------------------------------------------------------------------------
+    BeginDrawing();
+
+    ClearBackground(RAYWHITE);
+
+    DrawText("Pick X Cases", banner_x, 0, 30, BLACK);
+
+    // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
+    // (left-bottom)
+    // DrawTextureRec(target.texture,
+    //                (Rectangle){0, 0, (float)target.texture.width,
+    //                            (float)-target.texture.height},
+    //                (Vector2){0, 0}, WHITE);
+
+    button_draw(btn_play);
+
+    // Draw all cases
+    for (int i = 0; i < NUM_CASES; i++)
+    {
+      case_draw(cases[i]);
+    }
+
+ 
+    EndDrawing();
+    //----------------------------------------------------------------------------------
+  }
+
+  // De-Initialization
+  //--------------------------------------------------------------------------------------
+  // UnloadRenderTexture(target); // Unload render texture
+  // Free memory for each case
+  for (int i = 0; i < NUM_CASES; i++)
+  {
+    free(cases[i]);
+  }
+
+  CloseWindow(); // Close window and OpenGL context
+  //--------------------------------------------------------------------------------------
+
+  return 0;
+}
+
+// Function to initialize the title screen
+void UpdateTitleScreen()
+{
+  DrawText("Title Screen", 350, 200, 30, LIGHTGRAY);
+  DrawText("Press ENTER to Start", 300, 300, 20, LIGHTGRAY);
+}
+
+// Function to initialize the main game
+void UpdateGame()
+{
+  DrawText("Game is running...", 350, 200, 30, LIGHTGRAY);
+  // You can add game logic here like player movement, score, etc.
+}
+
+// Function to initialize the game over screen
+void UpdateGameOver()
+{
+  DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
+  DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
+}
+
+// Function to initialize the title screen
+void DrawTitleScreen()
+{
+  DrawText("Title Screen", 350, 200, 30, LIGHTGRAY);
+  DrawText("Press ENTER to Start", 300, 300, 20, LIGHTGRAY);
+}
+
+// Function to initialize the main game
+void RunGame()
+{
+  DrawText("Game is running...", 350, 200, 30, LIGHTGRAY);
+  // You can add game logic here like player movement, score, etc.
+}
+
+// Function to initialize the game over screen
+void DrawGameOver()
+{
+  DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
+  DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
+}
+
 // // #include <string.h> // For string manipulation (e.g., strcpy, strlen)
 // #include <stdio.h> // For input/output (e.g., printf, scanf)
 
@@ -280,256 +488,3 @@
 
 //   return 0;
 // }
-#include <stdlib.h>
-#include "../include/raylib/raylib.h"
-#include "../include/raylib/raymath.h"
-#include "../include/button.h"
-#include "../include/case.h"
-
-#define MAX_COLORS_COUNT 23 // Number of colors available
-#define NUM_CASES 24        // Example number of cases
-#define NUM_ROWS 4
-#define NUM_COLS 6
-#define CASE_WIDTH 100
-#define CASE_HEIGHT 50
-#define GAP_X 1 // Horizontal gap between cases
-#define GAP_Y 5 // Vertical gap between rows and above
-
-typedef enum {
-  TITLE,   // Title screen
-  GAME,    // Main game
-  GAMEOVER // Game Over screen
-} GameState;
-
-void StartGame() { TraceLog(LOG_INFO, "Start Game"); }
-
-//------------------------------------------------------------------------------------
-// Program main entry point
-//------------------------------------------------------------------------------------
-int main(void) {
-  // Initialization
-  //--------------------------------------------------------------------------------------
-  const int screenWidth = 800;
-  const int screenHeight = 450;
-
-  InitWindow(screenWidth, screenHeight,
-             "raylib [textures] example - mouse painting");
-
-  SetTraceLogLevel(LOG_ALL);
-
-  // Colors to choose from
-  // Color colors[MAX_COLORS_COUNT] = {
-  //     RAYWHITE,  YELLOW,    GOLD,   ORANGE,     PINK,    RED,
-  //     MAROON,    GREEN,     LIME,   DARKGREEN,  SKYBLUE, BLUE,
-  //     DARKBLUE,  PURPLE,    VIOLET, DARKPURPLE, BEIGE,   BROWN,
-  //     DARKBROWN, LIGHTGRAY, GRAY,   DARKGRAY,   BLACK};
-
-  Case *cases[NUM_CASES];
-  // Create a case (e.g., number 1, value 100, position (100, 100))
-
-  Button *btn_play = button_new("Play", 300, 200, StartGame, RED);
-
-  // Initialize multiple cases in 4 rows and 6 columns with gaps
-  for (int i = 0; i < NUM_CASES; i++) {
-    // Calculate the row and column
-    int row = i / NUM_COLS; // Integer division (gives row index)
-    int col = i % NUM_COLS; // Modulo operation (gives column index)
-
-    // Calculate the x and y positions based on row and column with gaps
-    int x = 20 + (col * (CASE_WIDTH + GAP_X));  // Add GAP_X between cases
-    int y = 50 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
-
-    // Create a new case with the calculated position
-    cases[i] = case_new(i + 1, (i + 1) * 100, x, y);
-  }
-
-  // Define colorsRecs data (for every rectangle)
-
-
-
-
-  int colorSelected = 0;
-  int colorSelectedPrev = colorSelected;
-  int colorMouseHover = 0;
-  float brushSize = 20.0f;
-  bool mouseWasPressed = false;
-
-  Rectangle btnSaveRec = {750, 10, 40, 30};
-  bool btnSaveMouseHover = false;
-  bool showSaveMessage = false;
-  int saveMessageCounter = 0;
-
-  // Create a RenderTexture2D to use as a canvas
-  //RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
-
-  // Clear render texture before entering the game loop
-  //BeginTextureMode(target);
-  //ClearBackground(RAYWHITE);
-  //EndTextureMode();
-
-  SetTargetFPS(60); // Set our game to run at 120 frames-per-second
-  //--------------------------------------------------------------------------------------
-
-  // Main game loop
-  while (!WindowShouldClose()) // Detect window close button or ESC key
-  {
-    // Update
-    //----------------------------------------------------------------------------------
-    Vector2 mousePos = GetMousePosition();
-    // Update each case
-    for (int i = 0; i < NUM_CASES; i++) {
-      case_update(cases[i], mousePos);
-
-      // Check if the case was clicked
-      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
-        case_was_clicked(cases[i]);
-      }
-    }
-
-    // Move between colors with keys
-    if (IsKeyPressed(KEY_RIGHT))
-      colorSelected++;
-    else if (IsKeyPressed(KEY_LEFT))
-      colorSelected--;
-
-    if (colorSelected >= MAX_COLORS_COUNT)
-      colorSelected = MAX_COLORS_COUNT - 1;
-    else if (colorSelected < 0)
-      colorSelected = 0;
-
-    
-
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-      // colorSelected = colorMouseHover;
-      // colorSelectedPrev = colorSelected;
-      TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x,
-                                    mousePos.y));
-      if (btn_play->is_hovered) {
-        button_was_clicked(btn_play);
-      }
-    }
-
-    // Change brush size
-    brushSize += GetMouseWheelMove() * 5;
-    if (brushSize < 2)
-      brushSize = 2;
-    if (brushSize > 50)
-      brushSize = 50;
-
-    if (IsKeyPressed(KEY_C)) {
-      
-    }
-
-    
-
-    // Update and draw the Button
-    button_update(btn_play, mousePos);
-
-    if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {
-      if (!mouseWasPressed) {
-        colorSelectedPrev = colorSelected;
-        colorSelected = 0;
-      }
-
-      mouseWasPressed = true;
-
-      
-    } else if (IsMouseButtonReleased(MOUSE_BUTTON_RIGHT) && mouseWasPressed) {
-      colorSelected = colorSelectedPrev;
-      mouseWasPressed = false;
-    }
-
-    // Check mouse hover save button
-    if (CheckCollisionPointRec(mousePos, btnSaveRec))
-      btnSaveMouseHover = true;
-    else
-      btnSaveMouseHover = false;
-
-
-
-    if (showSaveMessage) {
-      // On saving, show a full screen message for 2 seconds
-      saveMessageCounter++;
-      if (saveMessageCounter > 240) {
-        showSaveMessage = false;
-        saveMessageCounter = 0;
-      }
-    }
-    //----------------------------------------------------------------------------------
-
-    // Draw
-    //----------------------------------------------------------------------------------
-    BeginDrawing();
-
-    ClearBackground(RAYWHITE);
-
-    // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
-    // (left-bottom)
-    // DrawTextureRec(target.texture,
-    //                (Rectangle){0, 0, (float)target.texture.width,
-    //                            (float)-target.texture.height},
-    //                (Vector2){0, 0}, WHITE);
-
-    button_draw(btn_play);
-
-    // Draw all cases
-    for (int i = 0; i < NUM_CASES; i++) {
-      case_draw(cases[i]);
-    }
-
-    
-
-   
-
-    if (colorMouseHover >= 0)
-    
-
-
-    // Draw save image button
-    DrawRectangleLinesEx(btnSaveRec, 2, btnSaveMouseHover ? RED : BLACK);
-    DrawText("SAVE!", 755, 20, 10, btnSaveMouseHover ? RED : BLACK);
-
-    // Draw save image message
-    if (showSaveMessage) {
-      DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(),
-                    Fade(RAYWHITE, 0.8f));
-      DrawRectangle(0, 150, GetScreenWidth(), 80, BLACK);
-      DrawText("IMAGE SAVED:  my_amazing_texture_painting.png", 150, 180, 20,
-               RAYWHITE);
-    }
-
-    EndDrawing();
-    //----------------------------------------------------------------------------------
-  }
-
-  // De-Initialization
-  //--------------------------------------------------------------------------------------
-  //UnloadRenderTexture(target); // Unload render texture
-                               // Free memory for each case
-  for (int i = 0; i < NUM_CASES; i++) {
-    free(cases[i]);
-  }
-
-  CloseWindow(); // Close window and OpenGL context
-  //--------------------------------------------------------------------------------------
-
-  return 0;
-}
-
-// Function to initialize the title screen
-void DrawTitleScreen() {
-  DrawText("Title Screen", 350, 200, 30, LIGHTGRAY);
-  DrawText("Press ENTER to Start", 300, 300, 20, LIGHTGRAY);
-}
-
-// Function to initialize the main game
-void RunGame() {
-  DrawText("Game is running...", 350, 200, 30, LIGHTGRAY);
-  // You can add game logic here like player movement, score, etc.
-}
-
-// Function to initialize the game over screen
-void DrawGameOver() {
-  DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
-  DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
-}
