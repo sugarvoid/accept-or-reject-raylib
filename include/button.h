@@ -14,6 +14,8 @@ typedef struct {
     Color col;         // Button color
     bool is_hovered;  // Is the button hovered by the mouse
     Color txt_col;    // Text color
+    Vector2 textSize; 
+    Vector2 textPosition;
 } Button;
 
 // Function prototypes

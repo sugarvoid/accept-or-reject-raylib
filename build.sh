@@ -3,8 +3,8 @@
 # Define variables for the compiler and flags
 CC=gcc
 COMPILER_FLAGS="-O2 -Wall -Wno-missing-braces"
-LINKER_FLAGS="-L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11"
-
+# With box2d ### LINKER_FLAGS="-L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11"
+LINKER_FLAGS="-L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11"
 # Define the target executable
 TARGET="accept-reject"
 
@@ -79,11 +79,11 @@ release() {
     build
 
     # Create a folder inside bin with the target name
-    RELEASE_DIR="$BIN_DIR/$TARGET"
+    RELEASE_DIR="$BIN_DIR"
     mkdir -p $RELEASE_DIR
 
     # Copy the executable into the release directory
-    mv $TARGET $RELEASE_DIR/
+    # mv $TARGET $RELEASE_DIR
 
     # Copy the assets (or resource folder) into the release directory
     cp -r res $RELEASE_DIR/
@@ -103,6 +103,7 @@ case "$1" in
         run
         ;;
     "release")
+        clean
         release
         ;;
     *)

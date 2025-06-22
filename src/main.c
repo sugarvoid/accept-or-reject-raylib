@@ -1,20 +1,24 @@
-
+#include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
 #include "../include/raylib/raylib.h"
 #include "../include/raylib/raymath.h"
+#include "../include/globals.h" 
+#include "../include/main.h"
 #include "../include/button.h"
 #include "../include/case.h"
 
-#define MAX_COLORS_COUNT 23 // Number of colors available
-#define NUM_CASES 24        // Example number of cases
-#define NUM_ROWS 4
-#define NUM_COLS 6
-#define CASE_WIDTH 100
-#define CASE_HEIGHT 50
-#define GAP_X 1 // Horizontal gap between cases
-#define GAP_Y 5 // Vertical gap between rows and above
 
-#define TEXT_BLUE (Color){41, 173, 255, 255}
+Vector2 mousePos = (Vector2){0, 0};
+
+Button *btn_play = NULL;
+Button *btn_accept = NULL;
+Button *btn_reject = NULL;
+
+Case *cases[NUM_CASES] = {NULL};
+Sound duckSfx;
+
 
 typedef enum
 {
@@ -23,64 +27,69 @@ typedef enum
   GAMEOVER
 } GameState;
 
-void StartGame() { TraceLog(LOG_INFO, "Start Game"); }
+int game_state = TITLE;
+int banner_x = 0;
+char *bannerText = "";
+const int screenWidth = 960;
+const int screenHeight = 540;
+int playerCaseNumber = 0;
+int playerCaseValue = 0;
 
-//------------------------------------------------------------------------------------
-// Program main entry point
-//------------------------------------------------------------------------------------
+CaseValue case_values[24] = {
+    {1, true},
+    {3, true},
+    {5, true},
+    {10, true},
+    {25, true},
+    {50, true},
+    {75, true},
+    {100, true},
+    {200, true},
+    {250, true},
+    {500, true},
+    {750, true},
+    {1000, true},
+    {2500, true},
+    {5000, true},
+    {10000, true},
+    {25000, true},
+    {50000, true},
+    {100000, true},
+    {200000, true},
+    {300000, true},
+    {500000, true},
+    {750000, true},
+    {1000000, true}
+};
+
+
 int main(void)
 {
-  // Initialization
-  //--------------------------------------------------------------------------------------
-  const int screenWidth = 960;
-  const int screenHeight = 540;
-
-  int case_values[] = {
-      1,
-      3,
-      5,
-      10,
-      25,
-      50,
-      75,
-      100,
-      200,
-      250,
-      500,
-      750,
-      1000,
-      2500,
-      5000,
-      10000,
-      25000,
-      50000,
-      100000,
-      200000,
-      300000,
-      500000,
-      750000,
-      1000000};
-
-  int banner_x = 0;
-
   InitWindow(screenWidth, screenHeight, "Accept Or Reject");
-
+  InitAudioDevice(); 
+  SetTargetFPS(60);
   SetTraceLogLevel(LOG_ALL);
   SetExitKey(KEY_Q);
 
-  // Colors to choose from
-  // Color colors[MAX_COLORS_COUNT] = {
-  //     RAYWHITE,  YELLOW,    GOLD,   ORANGE,     PINK,    RED,
-  //     MAROON,    GREEN,     LIME,   DARKGREEN,  SKYBLUE, BLUE,
-  //     DARKBLUE,  PURPLE,    VIOLET, DARKPURPLE, BEIGE,   BROWN,
-  //     DARKBROWN, LIGHTGRAY, GRAY,   DARKGRAY,   BLACK};
+  bannerText = "Pick X Cases";
 
-  Case *cases[NUM_CASES];
-  // Create a case (e.g., number 1, value 100, position (100, 100))
+  duckSfx = LoadSound("res/duck.ogg");   
 
-  Button *btn_play = button_new("Play", 300, 350, StartGame, RED);
+  game_state = TITLE;
+  btn_play = button_new("Play", 300, 350, StartGame, RED);
+
+  // Case *cases[NUM_CASES];
+  //  Create a case (e.g., number 1, value 100, position (100, 100))
 
   // Initialize multiple cases in 4 rows and 6 columns with gaps
+  // TODO: Shuffle values without changing
+  // ShuffleCaseValues(case_values, NUM_CASES);
+  int indices[NUM_CASES];
+  for (int i = 0; i < NUM_CASES; i++)
+  {
+    indices[i] = i;
+  }
+  ShuffleCaseValues(indices, NUM_CASES);
   for (int i = 0; i < NUM_CASES; i++)
   {
     // Calculate the row and column
@@ -92,160 +101,178 @@ int main(void)
     int y = 50 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
 
     // Create a new case with the calculated position
-    cases[i] = case_new(i + 1, (i + 1) * 100, x, y);
+    cases[i] = case_new(i + 1, case_values[indices[i]].value, x, y);
+    cases[i]->value_index = indices[i];
+    if (!cases[i])
+    {
+      TraceLog(LOG_ERROR, "Failed to allocate memory for case %d", i);
+      CleanUp();
+      CloseWindow();
+      return 0;
+    }
+    
   }
 
-  // Define colorsRecs data (for every rectangle)
-
-  // Create a RenderTexture2D to use as a canvas
-  // RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
-
-  // Clear render texture before entering the game loop
-  // BeginTextureMode(target);
-  // ClearBackground(RAYWHITE);
-  // EndTextureMode();
-
-  SetTargetFPS(60); // Set our game to run at 120 frames-per-second
-  //--------------------------------------------------------------------------------------
-
-  // Main game loop
-  while (!WindowShouldClose()) // Detect window close button or ESC key
+  while (!WindowShouldClose())
   {
-    banner_x++;
-    if (banner_x >= screenWidth)
+    mousePos = GetMousePosition();
+    switch (game_state)
     {
-      banner_x = -100;
+    case TITLE:
+      UpdateTitleScreen();
+      break;
+    case GAME:
+      UpdateGame();
+      break;
+    case GAMEOVER:
+      break;
     }
 
-    // Update
-    //----------------------------------------------------------------------------------
-    Vector2 mousePos = GetMousePosition();
-    // Update each case
-    for (int i = 0; i < NUM_CASES; i++)
-    {
-      case_update(cases[i], mousePos);
-
-      // Check if the case was clicked
-      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered)
-      {
-        case_was_clicked(cases[i]);
-      }
-    }
-
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-    {
-      TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x, mousePos.y));
-      if (btn_play->is_hovered)
-      {
-        button_was_clicked(btn_play);
-      }
-    }
-
-    button_update(btn_play, mousePos);
-
-    //----------------------------------------------------------------------------------
-
-    // Draw
-    //----------------------------------------------------------------------------------
     BeginDrawing();
-
     ClearBackground(BLACK);
-
-    // DrawLineEx((Vector2){0, 1}, (Vector2){screenWidth, 1}, 5.0f, TEXT_BLUE);
-    // DrawLineEx((Vector2){0, 35}, (Vector2){screenWidth, 35}, 5.0f, TEXT_BLUE);
-
-    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 34}, 4.0f, TEXT_BLUE);
-    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f, TEXT_BLUE);
-    DrawRectangleLinesEx((Rectangle){0, 30, screenWidth - 300, screenHeight}, 4.0f, TEXT_BLUE);
-
-    DrawText("Pick X Cases", banner_x, 0, 36, ORANGE);
-
-    // DrawText("$1,000,000,000", 700, 400, 20, BLACK);
-
-    for (int i = 0; i < 12; i++)
+    switch (game_state)
     {
-      DrawText(TextFormat("$%d", case_values[i]), 700, 50 + (34 * i), 30, TEXT_BLUE);
+    case TITLE:
+      DrawTitleScreen();
+      break;
+    case GAME:
+      DrawGame();
+      break;
+    case GAMEOVER:
+      DrawGameOver();
+      break;
     }
-
-    for (int i = 12; i < 24; i++)
-    {
-      DrawText(TextFormat("$%d", case_values[i]), 800, 50 + (34 * (i - 12)), 30, TEXT_BLUE);
-    }
-
-    // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
-    // (left-bottom)
-    // DrawTextureRec(target.texture,
-    //                (Rectangle){0, 0, (float)target.texture.width,
-    //                            (float)-target.texture.height},
-    //                (Vector2){0, 0}, WHITE);
-
-    button_draw(btn_play);
-
-    // Draw all cases
-    for (int i = 0; i < NUM_CASES; i++)
-    {
-      case_draw(cases[i]);
-    }
-
     EndDrawing();
-    //----------------------------------------------------------------------------------
   }
 
   // De-Initialization
-  //--------------------------------------------------------------------------------------
-  // UnloadRenderTexture(target); // Unload render texture
-  // Free memory for each case
-  for (int i = 0; i < NUM_CASES; i++)
-  {
-    free(cases[i]);
-  }
+  CleanUp();
 
-  CloseWindow(); // Close window and OpenGL context
-  //--------------------------------------------------------------------------------------
-
+  // Close window and OpenGL context
+  CloseAudioDevice();
+  CloseWindow();
   return 0;
 }
 
-// Function to initialize the title screen
 void UpdateTitleScreen()
 {
-  DrawText("Title Screen", 350, 200, 30, LIGHTGRAY);
-  DrawText("Press ENTER to Start", 300, 300, 20, LIGHTGRAY);
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+  {
+    TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x, mousePos.y));
+    PlaySound(duckSfx);
+    if (btn_play->is_hovered)
+    {
+      button_was_clicked(btn_play);
+    }
+  }
+  button_update(btn_play, mousePos);
 }
 
-// Function to initialize the main game
 void UpdateGame()
 {
-  DrawText("Game is running...", 350, 200, 30, LIGHTGRAY);
-  // You can add game logic here like player movement, score, etc.
+  banner_x++;
+  if (banner_x >= screenWidth)
+  {
+    banner_x = -200;
+  }
+  // Update each case
+  for (int i = 0; i < NUM_CASES; i++)
+  {
+    case_update(cases[i], mousePos);
+
+    // Check if the case was clicked
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered)
+    {
+      case_was_clicked(cases[i]);
+    }
+  }
 }
 
-// Function to initialize the game over screen
 void UpdateGameOver()
 {
   DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
   DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
 }
 
-// Function to initialize the title screen
 void DrawTitleScreen()
 {
-  DrawText("Title Screen", 350, 200, 30, LIGHTGRAY);
-  DrawText("Press ENTER to Start", 300, 300, 20, LIGHTGRAY);
+  DrawText("Accept or Reject", 350, 200, 40, LIGHTGRAY);
+  button_draw(btn_play);
 }
 
-// Function to initialize the main game
-void RunGame()
+void DrawGame()
 {
-  DrawText("Game is running...", 350, 200, 30, LIGHTGRAY);
-  // You can add game logic here like player movement, score, etc.
+  DrawText(bannerText, banner_x, 0, 36, ORANGE);
+  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 34}, 4.0f, TEXT_BLUE);
+  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f, TEXT_BLUE);
+  DrawRectangleLinesEx((Rectangle){0, 30, screenWidth - 300, screenHeight}, 4.0f, TEXT_BLUE);
+  for (int i = 0; i < 12; i++)
+  {
+    DrawText(TextFormat("$%d", case_values[i].value), 700, 50 + (34 * i), 30, case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
+  }
+
+  for (int i = 12; i < 24; i++)
+  {
+    DrawText(TextFormat("$%d", case_values[i].value), 800, 50 + (34 * (i - 12)), 30, case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
+  }
+  // Draw all cases
+  for (int i = 0; i < NUM_CASES; i++)
+  {
+    case_draw(cases[i]);
+  }
 }
 
-// Function to initialize the game over screen
 void DrawGameOver()
 {
   DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
   DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
+}
+
+void StartGame()
+{
+  TraceLog(LOG_DEBUG, "Starting game");
+  game_state = GAME;
+}
+void AcceptDeal() { TraceLog(LOG_DEBUG, "Start Game"); }
+void RejectDeal() { TraceLog(LOG_DEBUG, "Start Game"); }
+
+void CleanUp(void)
+{
+  for (int i = 0; i < NUM_CASES; i++)
+  {
+    free(cases[i]);
+  }
+  free(btn_play);
+  free(btn_accept);
+  free(btn_reject);
+  UnloadSound(duckSfx); 
+}
+
+void ShuffleCaseValues(int *array, size_t n)
+{
+  srand(time(NULL));
+  // SetRandomSeed(rand());
+  if (n > 1)
+  {
+    size_t i;
+    for (i = 0; i < n - 1; i++)
+    {
+      size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
+      int t = array[j];
+      array[j] = array[i];
+      array[i] = t;
+    }
+  }
+}
+
+
+
+Sound LoadSoundSafe(const char *filename) {
+    Sound sound = LoadSound(filename);
+    if (sound.stream.buffer == NULL) {
+        TraceLog(LOG_ERROR, TextFormat("Failed to load sound: %s", filename));
+    }
+    return sound;
 }
 
 // // #include <string.h> // For string manipulation (e.g., strcpy, strlen)

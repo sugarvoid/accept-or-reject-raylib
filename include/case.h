@@ -7,7 +7,8 @@
 
 #define DEFAULT_COLOR (Color){ 88, 86, 85, 255 } 
 
-#define HOVER_COLOR (Color){ 129, 224, 218, 255 } 
+#define HOVER_COLOR (Color){ 255, 163, 0, 255 } 
+#define OFF_WHITE (Color){255,241,232,255}
 
 typedef struct {
     Rectangle rect;
@@ -20,6 +21,7 @@ typedef struct {
     bool picked;    // If the case has been selected
     bool visible;   // If the case is visible or hidden
     bool opened;
+    int value_index;
     Vector2 txt_pos; // Position of the text inside the case
     int move_t;      // Animation duration for case movement (optional)
     Vector2 end_loc; // End location (optional for animation)

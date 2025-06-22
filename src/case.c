@@ -1,9 +1,12 @@
+#include "../include/globals.h"
 #include "../include/case.h"
 #include <stdlib.h>
 
 Case *case_new(int number, int value, int x, int y)
 {
     Case *c = (Case *)malloc(sizeof(Case));
+    if (!c)
+        return NULL;
     c->number = number;
     c->value = value;
     c->rect = (Rectangle){x, y, 90, 50};
@@ -22,6 +25,27 @@ Case *case_new(int number, int value, int x, int y)
 
     return c;
 }
+
+// Case get_case(int xPos, int yPos, int value)
+// {
+//     Case c = {
+//         .rect = (Rectangle){xPos, yPos, 64, 64},
+//         .number = 5,
+//         .value = value,
+//         .position = (Vector2){xPos, yPos},
+//         .x = 3,
+//         .y = 2,
+//         .w = 64,
+//         .h = 64,
+//         .hovered = false,
+//         .picked = false,
+//         .visible = true,
+//         .opened = false,
+//         .txt_pos = (Vector2){108, 108},
+//         .move_t = 30,
+//         .end_loc = (Vector2){200, 200}};
+//     return c;
+// }
 
 // Function to check if mouse is hovering over the case
 bool is_colliding(int m_x, int m_y, Case *box)
@@ -43,14 +67,24 @@ void case_update(Case *c, Vector2 mousePos)
 // Handle case click
 void case_was_clicked(Case *c)
 {
-    if (!c->picked)
+    //if (playerCaseNumber == 0)
+    if (1 == 0)
     {
-        c->picked = true;
-        c->opened = true;
-        // Add your custom game logic here (e.g., handle next round, hide case, etc.)
-        TraceLog(LOG_DEBUG, TextFormat("Case %d was clicked! Value: %d\n", c->number, c->value));
-        // If necessary, hide the case
-        c->visible = false;
+        //TODO: Set player's case here. 
+        return;
+    }
+    else
+    {
+        if (!c->picked)
+        {
+            c->picked = true;
+            c->opened = true;
+            case_values[c->value_index].in_play = false;
+            // Add your custom game logic here (e.g., handle next round, hide case, etc.)
+            TraceLog(LOG_DEBUG, TextFormat("Case %d was clicked! Value: %d", c->number, c->value));
+            // If necessary, hide the case
+            c->visible = false;
+        }
     }
 }
 
@@ -61,8 +95,8 @@ void case_draw(Case *c)
     {
         // Draw the case with hover effect
         // Color current_col = c->hovered ? c->hover_col : c->col;
-        DrawRectangle(c->x, c->y, c->w, c->h, c->hovered ? DEFAULT_COLOR : HOVER_COLOR);
+        DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3, c->hovered ? HOVER_COLOR : DEFAULT_COLOR);
         // Draw the number inside the case
-        DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x, (int)c->txt_pos.y, 30, c->hovered ? RAYWHITE : DEFAULT_COLOR);
+        DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x, (int)c->txt_pos.y, 30, c->hovered ? OFF_WHITE : DEFAULT_COLOR);
     }
 }

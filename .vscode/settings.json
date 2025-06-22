@@ -53,6 +53,11 @@
 		"raylib.h": "c",
 		"rcamera.h": "c",
 		"stdbool.h": "c",
-		"stdlib.h": "c"
+		"stdlib.h": "c",
+		"button.h": "c",
+		"string.h": "c",
+		"case.h": "c",
+		"raymath.h": "c",
+		"globals.h": "c"
 	}
 }
