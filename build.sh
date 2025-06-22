@@ -6,7 +6,7 @@ COMPILER_FLAGS="-O2 -Wall -Wno-missing-braces"
 LINKER_FLAGS="-L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11"
 
 # Define the target executable
-TARGET="game"
+TARGET="accept-reject"
 
 # Define the output folder for binaries
 BIN_DIR="bin"
@@ -31,7 +31,7 @@ compile() {
 # Function to link object files into the target executable
 link() {
     echo "Linking $TARGET..."
-    $CC $OBJS $COMPILER_FLAGS $LINKER_FLAGS -o $TARGET
+    $CC $OBJS $COMPILER_FLAGS $LINKER_FLAGS -o "bin/$TARGET"
 }
 
 # Function to clean up build artifacts
@@ -56,7 +56,7 @@ build() {
 # Function to run the executable
 run() {
     echo "Running $TARGET..."
-    ./$TARGET
+    ./"bin/"$TARGET
 }
 
 # Function to rebuild and run the executable

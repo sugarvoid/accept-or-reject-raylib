@@ -14,6 +14,8 @@
 #define GAP_X 1 // Horizontal gap between cases
 #define GAP_Y 5 // Vertical gap between rows and above
 
+#define TEXT_BLUE (Color){41, 173, 255, 255}
+
 typedef enum
 {
   TITLE,
@@ -30,14 +32,41 @@ int main(void)
 {
   // Initialization
   //--------------------------------------------------------------------------------------
-  const int screenWidth = 800;
-  const int screenHeight = 450;
+  const int screenWidth = 960;
+  const int screenHeight = 540;
+
+  int case_values[] = {
+      1,
+      3,
+      5,
+      10,
+      25,
+      50,
+      75,
+      100,
+      200,
+      250,
+      500,
+      750,
+      1000,
+      2500,
+      5000,
+      10000,
+      25000,
+      50000,
+      100000,
+      200000,
+      300000,
+      500000,
+      750000,
+      1000000};
 
   int banner_x = 0;
 
   InitWindow(screenWidth, screenHeight, "Accept Or Reject");
 
   SetTraceLogLevel(LOG_ALL);
+  SetExitKey(KEY_Q);
 
   // Colors to choose from
   // Color colors[MAX_COLORS_COUNT] = {
@@ -68,8 +97,6 @@ int main(void)
 
   // Define colorsRecs data (for every rectangle)
 
-
-
   // Create a RenderTexture2D to use as a canvas
   // RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
 
@@ -85,7 +112,8 @@ int main(void)
   while (!WindowShouldClose()) // Detect window close button or ESC key
   {
     banner_x++;
-    if (banner_x >= screenWidth) {
+    if (banner_x >= screenWidth)
+    {
       banner_x = -100;
     }
 
@@ -115,19 +143,34 @@ int main(void)
 
     button_update(btn_play, mousePos);
 
-
-
-
-
     //----------------------------------------------------------------------------------
 
     // Draw
     //----------------------------------------------------------------------------------
     BeginDrawing();
 
-    ClearBackground(RAYWHITE);
+    ClearBackground(BLACK);
 
-    DrawText("Pick X Cases", banner_x, 0, 30, BLACK);
+    // DrawLineEx((Vector2){0, 1}, (Vector2){screenWidth, 1}, 5.0f, TEXT_BLUE);
+    // DrawLineEx((Vector2){0, 35}, (Vector2){screenWidth, 35}, 5.0f, TEXT_BLUE);
+
+    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 34}, 4.0f, TEXT_BLUE);
+    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f, TEXT_BLUE);
+    DrawRectangleLinesEx((Rectangle){0, 30, screenWidth - 300, screenHeight}, 4.0f, TEXT_BLUE);
+
+    DrawText("Pick X Cases", banner_x, 0, 36, ORANGE);
+
+    // DrawText("$1,000,000,000", 700, 400, 20, BLACK);
+
+    for (int i = 0; i < 12; i++)
+    {
+      DrawText(TextFormat("$%d", case_values[i]), 700, 50 + (34 * i), 30, TEXT_BLUE);
+    }
+
+    for (int i = 12; i < 24; i++)
+    {
+      DrawText(TextFormat("$%d", case_values[i]), 800, 50 + (34 * (i - 12)), 30, TEXT_BLUE);
+    }
 
     // NOTE: Render texture must be y-flipped due to default OpenGL coordinates
     // (left-bottom)
@@ -144,7 +187,6 @@ int main(void)
       case_draw(cases[i]);
     }
 
- 
     EndDrawing();
     //----------------------------------------------------------------------------------
   }
