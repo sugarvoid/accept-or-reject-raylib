@@ -1,32 +1,33 @@
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-#include "../include/raylib/raylib.h"
-#include "../include/raylib/raymath.h"
-#include "../include/globals.h" 
 #include "../include/main.h"
 #include "../include/button.h"
 #include "../include/case.h"
-
+#include "../include/globals.h"
+#include "../include/raylib/raylib.h"
+#include "../include/timer.h"
+// #include "../include/raylib/raymath.h"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 Vector2 mousePos = (Vector2){0, 0};
+
+Player *player = NULL;
 
 Button *btn_play = NULL;
 Button *btn_accept = NULL;
 Button *btn_reject = NULL;
 
 Case *cases[NUM_CASES] = {NULL};
-Sound duckSfx;
+Case *pickedCase = NULL;
+Case *playerCase = NULL;
+Sound duck_sfx;
 
+typedef enum { TITLE, GAME, GAMEOVER } GameState;
 
-typedef enum
-{
-  TITLE,
-  GAME,
-  GAMEOVER
-} GameState;
-
+int gameRound = 0;
 int game_state = TITLE;
 int banner_x = 0;
 char *bannerText = "";
@@ -34,46 +35,32 @@ const int screenWidth = 960;
 const int screenHeight = 540;
 int playerCaseNumber = 0;
 int playerCaseValue = 0;
+bool showingCaseValue = false;
+
+Timer ballTimer = {0};
 
 CaseValue case_values[24] = {
-    {1, true},
-    {3, true},
-    {5, true},
-    {10, true},
-    {25, true},
-    {50, true},
-    {75, true},
-    {100, true},
-    {200, true},
-    {250, true},
-    {500, true},
-    {750, true},
-    {1000, true},
-    {2500, true},
-    {5000, true},
-    {10000, true},
-    {25000, true},
-    {50000, true},
-    {100000, true},
-    {200000, true},
-    {300000, true},
-    {500000, true},
-    {750000, true},
-    {1000000, true}
-};
+    {1, true},      {3, true},      {5, true},      {10, true},
+    {25, true},     {50, true},     {75, true},     {100, true},
+    {200, true},    {250, true},    {500, true},    {750, true},
+    {1000, true},   {2500, true},   {5000, true},   {10000, true},
+    {25000, true},  {50000, true},  {100000, true}, {200000, true},
+    {300000, true}, {500000, true}, {750000, true}, {1000000, true}};
 
-
-int main(void)
-{
+int main(void) {
   InitWindow(screenWidth, screenHeight, "Accept Or Reject");
-  InitAudioDevice(); 
+  InitAudioDevice();
   SetTargetFPS(60);
   SetTraceLogLevel(LOG_ALL);
   SetExitKey(KEY_Q);
 
-  bannerText = "Pick X Cases";
+  bannerText = "Select Your Case";
 
-  duckSfx = LoadSound("res/duck.ogg");   
+  duck_sfx = LoadSound("res/duck.ogg");
+  player = calloc(1, sizeof(Player));
+  // player = malloc(sizeof(Player));
+  // player->CaseNum = 0;
+  // player->CaseVaule = 0;
 
   game_state = TITLE;
   btn_play = button_new("Play", 300, 350, StartGame, RED);
@@ -85,39 +72,35 @@ int main(void)
   // TODO: Shuffle values without changing
   // ShuffleCaseValues(case_values, NUM_CASES);
   int indices[NUM_CASES];
-  for (int i = 0; i < NUM_CASES; i++)
-  {
+  for (int i = 0; i < NUM_CASES; i++) {
     indices[i] = i;
   }
   ShuffleCaseValues(indices, NUM_CASES);
-  for (int i = 0; i < NUM_CASES; i++)
-  {
+
+  // Setting up cases
+  for (int i = 0; i < NUM_CASES; i++) {
     // Calculate the row and column
     int row = i / NUM_COLS; // Integer division (gives row index)
     int col = i % NUM_COLS; // Modulo operation (gives column index)
 
     // Calculate the x and y positions based on row and column with gaps
-    int x = 20 + (col * (CASE_WIDTH + GAP_X));  // Add GAP_X between cases
-    int y = 50 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
+    int x = 30 + (col * (CASE_WIDTH + GAP_X));  // Add GAP_X between cases
+    int y = 60 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
 
     // Create a new case with the calculated position
     cases[i] = case_new(i + 1, case_values[indices[i]].value, x, y);
     cases[i]->value_index = indices[i];
-    if (!cases[i])
-    {
+    if (!cases[i]) {
       TraceLog(LOG_ERROR, "Failed to allocate memory for case %d", i);
       CleanUp();
       CloseWindow();
       return 0;
     }
-    
   }
 
-  while (!WindowShouldClose())
-  {
+  while (!WindowShouldClose()) {
     mousePos = GetMousePosition();
-    switch (game_state)
-    {
+    switch (game_state) {
     case TITLE:
       UpdateTitleScreen();
       break;
@@ -130,8 +113,7 @@ int main(void)
 
     BeginDrawing();
     ClearBackground(BLACK);
-    switch (game_state)
-    {
+    switch (game_state) {
     case TITLE:
       DrawTitleScreen();
       break;
@@ -154,109 +136,101 @@ int main(void)
   return 0;
 }
 
-void UpdateTitleScreen()
-{
-  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
-  {
-    TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x, mousePos.y));
-    PlaySound(duckSfx);
-    if (btn_play->is_hovered)
-    {
+void UpdateTitleScreen() {
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x,
+                                  mousePos.y));
+    PlaySound(duck_sfx);
+    if (btn_play->is_hovered) {
       button_was_clicked(btn_play);
     }
   }
   button_update(btn_play, mousePos);
 }
 
-void UpdateGame()
-{
+void UpdateGame() {
   banner_x++;
-  if (banner_x >= screenWidth)
-  {
+  if (banner_x >= screenWidth) {
     banner_x = -200;
   }
   // Update each case
-  for (int i = 0; i < NUM_CASES; i++)
-  {
+  for (int i = 0; i < NUM_CASES; i++) {
     case_update(cases[i], mousePos);
 
     // Check if the case was clicked
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered)
-    {
-      case_was_clicked(cases[i]);
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
+      // case_was_clicked(cases[i]);
+      PlayerPickCase(player, cases[i]);
     }
   }
 }
 
-void UpdateGameOver()
-{
+void UpdateGameOver() {
   DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
   DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
 }
 
-void DrawTitleScreen()
-{
+void DrawTitleScreen() {
   DrawText("Accept or Reject", 350, 200, 40, LIGHTGRAY);
   button_draw(btn_play);
 }
 
-void DrawGame()
-{
-  DrawText(bannerText, banner_x, 0, 36, ORANGE);
-  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 34}, 4.0f, TEXT_BLUE);
-  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f, TEXT_BLUE);
-  DrawRectangleLinesEx((Rectangle){0, 30, screenWidth - 300, screenHeight}, 4.0f, TEXT_BLUE);
-  for (int i = 0; i < 12; i++)
-  {
-    DrawText(TextFormat("$%d", case_values[i].value), 700, 50 + (34 * i), 30, case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
-  }
+void DrawGame() {
+  if (!showingCaseValue) {
+    DrawText(bannerText, banner_x, 0, 36, ORANGE);
+    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 34}, 4.0f, TEXT_BLUE);
+    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f,
+                         TEXT_BLUE);
+    DrawRectangleLinesEx((Rectangle){0, 30, screenWidth - 300, screenHeight},
+                         4.0f, TEXT_BLUE);
+    for (int i = 0; i < 12; i++) {
+      DrawText(TextFormat("$%d", case_values[i].value), 700, 50 + (34 * i), 30,
+               case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
+    }
 
-  for (int i = 12; i < 24; i++)
-  {
-    DrawText(TextFormat("$%d", case_values[i].value), 800, 50 + (34 * (i - 12)), 30, case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
-  }
-  // Draw all cases
-  for (int i = 0; i < NUM_CASES; i++)
-  {
-    case_draw(cases[i]);
+    for (int i = 12; i < 24; i++) {
+      DrawText(TextFormat("$%d", case_values[i].value), 800,
+               50 + (34 * (i - 12)), 30,
+               case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
+    }
+    // Draw all cases
+    for (int i = 0; i < NUM_CASES; i++) {
+      case_draw(cases[i]);
+    }
+  } else {
+    DrawCaseValue(pickedCase);
   }
 }
 
-void DrawGameOver()
-{
+void DrawGameOver() {
   DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
   DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
 }
 
-void StartGame()
-{
+void StartGame() {
   TraceLog(LOG_DEBUG, "Starting game");
   game_state = GAME;
 }
 void AcceptDeal() { TraceLog(LOG_DEBUG, "Start Game"); }
 void RejectDeal() { TraceLog(LOG_DEBUG, "Start Game"); }
 
-void CleanUp(void)
-{
-  for (int i = 0; i < NUM_CASES; i++)
-  {
+void CleanUp(void) {
+  for (int i = 0; i < NUM_CASES; i++) {
     free(cases[i]);
   }
   free(btn_play);
   free(btn_accept);
   free(btn_reject);
-  UnloadSound(duckSfx); 
+  free(player);
+  UnloadSound(duck_sfx);
 }
 
-void ShuffleCaseValues(int *array, size_t n)
-{
+void ShuffleCaseValues(int *array, size_t n) {
   srand(time(NULL));
   // SetRandomSeed(rand());
-  if (n > 1)
-  {
+  if (n > 1) {
     size_t i;
-    for (i = 0; i < n - 1; i++)
-    {
+    for (i = 0; i < n - 1; i++) {
       size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
       int t = array[j];
       array[j] = array[i];
@@ -265,14 +239,26 @@ void ShuffleCaseValues(int *array, size_t n)
   }
 }
 
-
-
 Sound LoadSoundSafe(const char *filename) {
-    Sound sound = LoadSound(filename);
-    if (sound.stream.buffer == NULL) {
-        TraceLog(LOG_ERROR, TextFormat("Failed to load sound: %s", filename));
-    }
-    return sound;
+  Sound sound = LoadSound(filename);
+  if (sound.stream.buffer == NULL) {
+    TraceLog(LOG_ERROR, TextFormat("Failed to load sound: %s", filename));
+  }
+  return sound;
+}
+
+void DrawCaseValue(Case *c) {}
+
+const char *pluralize_cases(int n) {
+  static char buffer[32];
+
+  if (n == 1) {
+    snprintf(buffer, sizeof(buffer), "1 Case");
+  } else {
+    snprintf(buffer, sizeof(buffer), "%d Cases", n);
+  }
+
+  return buffer;
 }
 
 // // #include <string.h> // For string manipulation (e.g., strcpy, strlen)

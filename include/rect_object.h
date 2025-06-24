@@ -6,10 +6,9 @@
 #include "../include/raylib/raylib.h"
 
 typedef struct {
-    int x, y, w, h;
+  int x, y, w, h;
 } RectObject;
 
-
-bool is_mouse_colliding(Vector2 mousePos, RectObject* obj);
+bool is_mouse_colliding(Vector2 mousePos, RectObject *obj);
 
 #endif // RECT_OBJECT_H

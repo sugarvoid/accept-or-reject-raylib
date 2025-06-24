@@ -1,29 +1,30 @@
-#include "../include/globals.h"
 #include "../include/case.h"
+#include "../include/globals.h"
 #include <stdlib.h>
+#include <string.h>
 
-Case *case_new(int number, int value, int x, int y)
-{
-    Case *c = (Case *)malloc(sizeof(Case));
-    if (!c)
-        return NULL;
-    c->number = number;
-    c->value = value;
-    c->rect = (Rectangle){x, y, 90, 50};
-    // c->rect = (RectObject){x, y, 100, 60};
-    c->x = x;
-    c->y = y;
-    c->w = 90; // width of the case
-    c->h = 50; // height of the case
-    c->hovered = false;
-    c->picked = false;
-    c->opened = false;
-    c->visible = true;
-    c->move_t = 500;                 // Default move time (can be used for animations)
-    c->end_loc = (Vector2){200, 60}; // Default end location
-    c->txt_pos = (Vector2){x + 8, y + 6};
+Case *case_new(int number, int value, int x, int y) {
+  Case *c = (Case *)malloc(sizeof(Case));
+  if (!c)
+    return NULL;
+  c->number = number;
+  c->value = value;
+  c->rect = (Rectangle){x, y, 90, 50};
+  // c->rect = (RectObject){x, y, 100, 60};
+  c->x = x;
+  c->y = y;
+  c->w = CASE_WIDTH;  // width of the case
+  c->h = CASE_HEIGHT; // height of the case
+  c->selected = false;
+  c->hovered = false;
+  c->picked = false;
+  c->opened = false;
+  c->visible = true;
+  c->move_t = 500; // Default move time (can be used for animations)
+  c->end_loc = (Vector2){200, 60}; // Default end location
+  c->txt_pos = (Vector2){x + 8, y + 6};
 
-    return c;
+  return c;
 }
 
 // Case get_case(int xPos, int yPos, int value)
@@ -48,55 +49,70 @@ Case *case_new(int number, int value, int x, int y)
 // }
 
 // Function to check if mouse is hovering over the case
-bool is_colliding(int m_x, int m_y, Case *box)
-{
-    if (m_x < box->x + box->w && m_x > box->x &&
-        m_y < box->y + box->h && m_y > box->y)
-    {
-        return true;
-    }
-    return false;
+bool is_colliding(int m_x, int m_y, Case *box) {
+  if (m_x < box->x + box->w && m_x > box->x && m_y < box->y + box->h &&
+      m_y > box->y) {
+    return true;
+  }
+  return false;
 }
 
 // Update function to detect hover
-void case_update(Case *c, Vector2 mousePos)
-{
-    c->hovered = CheckCollisionPointRec(mousePos, c->rect);
+void case_update(Case *c, Vector2 mousePos) {
+  c->hovered = CheckCollisionPointRec(mousePos, c->rect);
 }
 
 // Handle case click
-void case_was_clicked(Case *c)
-{
-    //if (playerCaseNumber == 0)
-    if (1 == 0)
-    {
-        //TODO: Set player's case here. 
-        return;
+void case_was_clicked(Case *c) {
+  // if (playerCaseNumber == 0)
+  if (playerCase == NULL) {
+    // TODO: Set player's case here.
+    playerCase = c;
+    return;
+  } else {
+    if (!c->picked && !c->selected) {
+      pickedCase = c;
+      c->picked = true;
+      c->opened = true;
+      case_values[c->value_index].in_play = false;
+      // Add your custom game logic here (e.g., handle next round, hide case,
+      // etc.)
+      OpenCase(c);
+
+      // If necessary, hide the case
+      c->visible = false;
     }
-    else
-    {
-        if (!c->picked)
-        {
-            c->picked = true;
-            c->opened = true;
-            case_values[c->value_index].in_play = false;
-            // Add your custom game logic here (e.g., handle next round, hide case, etc.)
-            TraceLog(LOG_DEBUG, TextFormat("Case %d was clicked! Value: %d", c->number, c->value));
-            // If necessary, hide the case
-            c->visible = false;
-        }
-    }
+  }
 }
 
 // Draw the case using Raylib
-void case_draw(Case *c)
-{
-    if (c->visible)
-    {
-        // Draw the case with hover effect
-        // Color current_col = c->hovered ? c->hover_col : c->col;
-        DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3, c->hovered ? HOVER_COLOR : DEFAULT_COLOR);
-        // Draw the number inside the case
-        DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x, (int)c->txt_pos.y, 30, c->hovered ? OFF_WHITE : DEFAULT_COLOR);
+void case_draw(Case *c) {
+  if (c->visible) {
+    // Draw the case with hover effect
+    // Color current_col = c->hovered ? c->hover_col : c->col;
+    if (c->selected) {
+      DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3, RED);
+      // Draw the number inside the case
+      DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
+               (int)c->txt_pos.y, 30, RED);
+    } else {
+      DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3,
+                           c->hovered ? HOVER_COLOR : DEFAULT_COLOR);
+      // Draw the number inside the case
+      DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
+               (int)c->txt_pos.y, 30, c->hovered ? OFF_WHITE : DEFAULT_COLOR);
     }
+  }
+}
+
+void OpenCase(Case *c) {
+  if (!c->selected) {
+    TraceLog(LOG_DEBUG,
+             TextFormat("Case %d was clicked! Value: %d", c->number, c->value));
+
+    c->opened = true;
+    c->picked = true;
+    case_values[c->value_index].in_play = false;
+    c->visible = false;
+  }
 }

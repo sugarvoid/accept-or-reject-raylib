@@ -1,18 +1,15 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "../include/case.h"
 #include "raylib/raylib.h"
 
-typedef struct Player
-{
-  Texture2D texture;
-  Vector2 position;
-  int width;
-  int health;
-  int height;
-  float speed;
-  bool isShooting;
+typedef struct Player {
+  int CaseNum;
+  int CaseVaule;
 } Player;
+
+void PlayerPickCase(Player *p, Case *c);
 
 Player Player_Create();
 void Player_Destroy(Player *p);
