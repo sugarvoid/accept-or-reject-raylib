@@ -4,13 +4,12 @@
 #include <string.h>
 
 Case *case_new(int number, int value, int x, int y) {
-  Case *c = (Case *)malloc(sizeof(Case));
+  Case *c = malloc(sizeof(Case));
   if (!c)
     return NULL;
   c->number = number;
   c->value = value;
-  c->rect = (Rectangle){x, y, 90, 50};
-  // c->rect = (RectObject){x, y, 100, 60};
+  c->rect = (Rectangle){x, y, CASE_WIDTH, CASE_HEIGHT};
   c->x = x;
   c->y = y;
   c->w = CASE_WIDTH;  // width of the case
@@ -21,7 +20,7 @@ Case *case_new(int number, int value, int x, int y) {
   c->opened = false;
   c->visible = true;
   c->move_t = 500; // Default move time (can be used for animations)
-  c->end_loc = (Vector2){200, 60}; // Default end location
+  // c->end_loc = (Vector2){200, 60}; // Default end location
   c->txt_pos = (Vector2){x + 8, y + 6};
 
   return c;
@@ -58,12 +57,12 @@ bool is_colliding(int m_x, int m_y, Case *box) {
 }
 
 // Update function to detect hover
-void case_update(Case *c, Vector2 mousePos) {
+void UpdateCase(Case *c, Vector2 mousePos) {
   c->hovered = CheckCollisionPointRec(mousePos, c->rect);
 }
 
 // Handle case click
-void case_was_clicked(Case *c) {
+void OnCaseClick(Case *c) {
   // if (playerCaseNumber == 0)
   if (playerCase == NULL) {
     // TODO: Set player's case here.
@@ -86,15 +85,15 @@ void case_was_clicked(Case *c) {
 }
 
 // Draw the case using Raylib
-void case_draw(Case *c) {
+void DrawCase(Case *c) {
   if (c->visible) {
     // Draw the case with hover effect
     // Color current_col = c->hovered ? c->hover_col : c->col;
     if (c->selected) {
-      DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3, RED);
+      DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3, TEXT_BLUE);
       // Draw the number inside the case
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
-               (int)c->txt_pos.y, 30, RED);
+               (int)c->txt_pos.y, 30, TEXT_BLUE);
     } else {
       DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3,
                            c->hovered ? HOVER_COLOR : DEFAULT_COLOR);

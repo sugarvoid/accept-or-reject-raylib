@@ -38,6 +38,7 @@ int playerCaseValue = 0;
 bool showingCaseValue = false;
 
 Timer ballTimer = {0};
+Timer tmrOpeningCase = {0};
 
 CaseValue case_values[24] = {
     {1, true},      {3, true},      {5, true},      {10, true},
@@ -155,7 +156,7 @@ void UpdateGame() {
   }
   // Update each case
   for (int i = 0; i < NUM_CASES; i++) {
-    case_update(cases[i], mousePos);
+    UpdateCase(cases[i], mousePos);
 
     // Check if the case was clicked
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
@@ -195,7 +196,7 @@ void DrawGame() {
     }
     // Draw all cases
     for (int i = 0; i < NUM_CASES; i++) {
-      case_draw(cases[i]);
+      DrawCase(cases[i]);
     }
   } else {
     DrawCaseValue(pickedCase);

@@ -32,9 +32,9 @@ typedef struct {
 
 // Function prototypes
 Case *case_new(int number, int value, int x, int y);
-void case_update(Case *c, Vector2 mousePos);
-void case_draw(Case *c);
-void case_was_clicked(Case *c);
+void UpdateCase(Case *c, Vector2 mousePos);
+void DrawCase(Case *c);
+void OnCaseClick(Case *c);
 void OpenCase(Case *c);
 
 #endif // CASE_H

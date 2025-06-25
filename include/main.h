@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include "../include/case.h"
+#include "../include/glob.h"
 #include "../include/player.h"
 #include "../include/raylib/raylib.h"
 #include "../include/raylib/raymath.h"
@@ -16,8 +17,6 @@
 // #define CASE_HEIGHT 50
 #define GAP_X 10 // Horizontal gap between cases
 #define GAP_Y 15 // Vertical gap between rows and above
-#define TEXT_BLUE (Color){41, 173, 255, 255}
-#define TEXT_GRAY (Color){95, 87, 79, 255}
 
 void UpdateTitleScreen(void);
 void UpdateGame(void);
@@ -36,6 +35,9 @@ void RejectDeal(void);
 
 void ShuffleCaseValues(int *array, size_t n);
 Sound LoadSoundSafe(const char *filename);
+
+void GoToGameOver(Player *p);
+
 void CleanUp(void);
 
 #endif // MAIN_H

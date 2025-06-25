@@ -6,6 +6,9 @@
 
 #define NUM_CASES 24
 
+#define TEXT_BLUE (Color){41, 173, 255, 255}
+#define TEXT_GRAY (Color){95, 87, 79, 255}
+
 typedef struct {
   int value;
   bool in_play;
