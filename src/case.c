@@ -1,5 +1,6 @@
 #include "../include/case.h"
 #include "../include/globals.h"
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,6 +15,7 @@ Case *case_new(int number, int value, int x, int y) {
   c->y = y;
   c->w = CASE_WIDTH;  // width of the case
   c->h = CASE_HEIGHT; // height of the case
+  c->interactable = true;
   c->selected = false;
   c->hovered = false;
   c->picked = false;
@@ -66,20 +68,11 @@ void OnCaseClick(Case *c) {
   // if (playerCaseNumber == 0)
   if (playerCase == NULL) {
     // TODO: Set player's case here.
-    playerCase = c;
+    // playerCase = c;
     return;
   } else {
     if (!c->picked && !c->selected) {
-      pickedCase = c;
-      c->picked = true;
-      c->opened = true;
-      case_values[c->value_index].in_play = false;
-      // Add your custom game logic here (e.g., handle next round, hide case,
-      // etc.)
       OpenCase(c);
-
-      // If necessary, hide the case
-      c->visible = false;
     }
   }
 }
@@ -106,12 +99,20 @@ void DrawCase(Case *c) {
 
 void OpenCase(Case *c) {
   if (!c->selected) {
-    TraceLog(LOG_DEBUG,
-             TextFormat("Case %d was clicked! Value: %d", c->number, c->value));
-
+    UpdateCaseDisplay(c->number, c->value);
+    // TraceLog(LOG_DEBUG, TextFormat("Case %d was clicked! Value: %d",
+    // c->number, c->value));
+    c->interactable = false;
+    c->hovered = false;
     c->opened = true;
+    c->selected = false;
     c->picked = true;
     case_values[c->value_index].in_play = false;
     c->visible = false;
   }
+}
+
+void UpdateCaseDisplay(int case_num, int case_val) {
+  opened_case_num = case_num;
+  opened_case_value = case_val;
 }

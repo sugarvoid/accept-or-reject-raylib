@@ -33,6 +33,9 @@ void StartGame(void);
 void AcceptDeal(void);
 void RejectDeal(void);
 
+// void UpdateCaseDisplay(int case_num, int case_val);
+void DrawOpenedCaseInfo();
+
 void ShuffleCaseValues(int *array, size_t n);
 Sound LoadSoundSafe(const char *filename);
 

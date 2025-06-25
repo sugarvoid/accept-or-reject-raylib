@@ -12,6 +12,11 @@
 #include <string.h>
 #include <time.h>
 
+#define SHOW_CASE_VAULE_TIME 1.0f
+#define FPS 30
+#define BANNER_FONT_SIZE 38
+#define BANNER_SCROLL_SPEED 2
+
 Vector2 mousePos = (Vector2){0, 0};
 
 Player *player = NULL;
@@ -23,6 +28,8 @@ Button *btn_reject = NULL;
 Case *cases[NUM_CASES] = {NULL};
 Case *pickedCase = NULL;
 Case *playerCase = NULL;
+int opened_case_num = 0;
+int opened_case_value = 0;
 Sound duck_sfx;
 
 typedef enum { TITLE, GAME, GAMEOVER } GameState;
@@ -37,8 +44,8 @@ int playerCaseNumber = 0;
 int playerCaseValue = 0;
 bool showingCaseValue = false;
 
-Timer ballTimer = {0};
-Timer tmrOpeningCase = {0};
+Timer *ballTimer = NULL;
+Timer *opening_case_timer = NULL;
 
 CaseValue case_values[24] = {
     {1, true},      {3, true},      {5, true},      {10, true},
@@ -51,7 +58,7 @@ CaseValue case_values[24] = {
 int main(void) {
   InitWindow(screenWidth, screenHeight, "Accept Or Reject");
   InitAudioDevice();
-  SetTargetFPS(60);
+  SetTargetFPS(FPS);
   SetTraceLogLevel(LOG_ALL);
   SetExitKey(KEY_Q);
 
@@ -59,12 +66,9 @@ int main(void) {
 
   duck_sfx = LoadSound("res/duck.ogg");
   player = calloc(1, sizeof(Player));
-  // player = malloc(sizeof(Player));
-  // player->CaseNum = 0;
-  // player->CaseVaule = 0;
-
   game_state = TITLE;
-  btn_play = button_new("Play", 300, 350, StartGame, RED);
+  btn_play = button_new("Play", 300, 350, StartGame, TEXT_BLUE);
+  opening_case_timer = CreateTimer();
 
   // Case *cases[NUM_CASES];
   //  Create a case (e.g., number 1, value 100, position (100, 100))
@@ -141,7 +145,7 @@ void UpdateTitleScreen() {
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
     TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x,
                                   mousePos.y));
-    PlaySound(duck_sfx);
+
     if (btn_play->is_hovered) {
       button_was_clicked(btn_play);
     }
@@ -150,18 +154,26 @@ void UpdateTitleScreen() {
 }
 
 void UpdateGame() {
-  banner_x++;
+  UpdateTimer(opening_case_timer);
+  banner_x += 2;
   if (banner_x >= screenWidth) {
-    banner_x = -200;
+    banner_x = -MeasureText(bannerText, 38);
   }
   // Update each case
   for (int i = 0; i < NUM_CASES; i++) {
-    UpdateCase(cases[i], mousePos);
+    if (cases[i]->interactable) {
+      UpdateCase(cases[i], mousePos);
+    }
 
     // Check if the case was clicked
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
-      // case_was_clicked(cases[i]);
+      if (player->CaseNum != 0) {
+        StartTimer(opening_case_timer, SHOW_CASE_VAULE_TIME);
+      }
       PlayerPickCase(player, cases[i]);
+      if (cases[i]->value == 1000000) {
+        PlaySound(duck_sfx);
+      }
     }
   }
 }
@@ -177,12 +189,12 @@ void DrawTitleScreen() {
 }
 
 void DrawGame() {
-  if (!showingCaseValue) {
-    DrawText(bannerText, banner_x, 0, 36, ORANGE);
-    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 34}, 4.0f, TEXT_BLUE);
+  if (opening_case_timer->TimeLeft <= 0) {
+    DrawText(bannerText, banner_x, 4, BANNER_FONT_SIZE, TEXT_ORANGE);
+    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 44}, 4.0f, TEXT_BLUE);
     DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f,
                          TEXT_BLUE);
-    DrawRectangleLinesEx((Rectangle){0, 30, screenWidth - 300, screenHeight},
+    DrawRectangleLinesEx((Rectangle){0, 40, screenWidth - 300, screenHeight},
                          4.0f, TEXT_BLUE);
     for (int i = 0; i < 12; i++) {
       DrawText(TextFormat("$%d", case_values[i].value), 700, 50 + (34 * i), 30,
@@ -199,13 +211,18 @@ void DrawGame() {
       DrawCase(cases[i]);
     }
   } else {
-    DrawCaseValue(pickedCase);
+    DrawOpenedCaseInfo();
   }
 }
 
 void DrawGameOver() {
   DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
   DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
+}
+
+void DrawOpenedCaseInfo() {
+  DrawText(TextFormat("Case %d had", opened_case_num), 350, 200, 30, LIGHTGRAY);
+  DrawText(TextFormat("$ %d", opened_case_value), 280, 300, 40, LIGHTGRAY);
 }
 
 void StartGame() {

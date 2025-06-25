@@ -22,6 +22,7 @@ typedef struct {
   bool hovered; // If the mouse is hovering over the case
   bool picked;  // If the case has been selected
   bool visible; // If the case is visible or hidden
+  bool interactable;
   bool opened;
   bool selected;
   int value_index;
@@ -36,5 +37,6 @@ void UpdateCase(Case *c, Vector2 mousePos);
 void DrawCase(Case *c);
 void OnCaseClick(Case *c);
 void OpenCase(Case *c);
+void UpdateCaseDisplay(int case_num, int case_val);
 
 #endif // CASE_H

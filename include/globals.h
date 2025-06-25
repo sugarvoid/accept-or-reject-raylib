@@ -8,6 +8,7 @@
 
 #define TEXT_BLUE (Color){41, 173, 255, 255}
 #define TEXT_GRAY (Color){95, 87, 79, 255}
+#define TEXT_ORANGE (Color){255, 136, 0, 255}
 
 typedef struct {
   int value;
@@ -19,5 +20,8 @@ extern Case *playerCase;
 extern Case *pickedCase;
 extern int playerCaseNumber;
 extern int playerCaseValue;
+
+extern int opened_case_num;
+extern int opened_case_value;
 
 #endif // GLOBALS_H
