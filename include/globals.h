@@ -10,6 +10,9 @@
 #define TEXT_GRAY (Color){95, 87, 79, 255}
 #define TEXT_ORANGE (Color){255, 136, 0, 255}
 
+#define PT_GREEN (Color){0, 178, 81, 255}
+#define PT_RED (Color){255, 0, 77, 255}
+
 typedef struct {
   int value;
   bool in_play;

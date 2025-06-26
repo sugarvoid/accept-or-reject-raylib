@@ -32,6 +32,12 @@ const char *pluralize_cases(int n);
 void StartGame(void);
 void AcceptDeal(void);
 void RejectDeal(void);
+void ResetGame(void);
+void SetupCases(void);
+
+void AdvanceRound(void);
+int GetOffer(void);
+void UpdateBannerText(int n_cases);
 
 // void UpdateCaseDisplay(int case_num, int case_val);
 void DrawOpenedCaseInfo();

@@ -11,18 +11,19 @@ Case *case_new(int number, int value, int x, int y) {
   c->number = number;
   c->value = value;
   c->rect = (Rectangle){x, y, CASE_WIDTH, CASE_HEIGHT};
-  c->x = x;
-  c->y = y;
-  c->w = CASE_WIDTH;  // width of the case
-  c->h = CASE_HEIGHT; // height of the case
+  // c->x = x;
+  // c->y = y;
+  c->position = (Vector2){x, y};
+  // c->w = CASE_WIDTH;  // width of the case
+  // c->h = CASE_HEIGHT; // height of the case
   c->interactable = true;
   c->selected = false;
   c->hovered = false;
   c->picked = false;
   c->opened = false;
   c->visible = true;
-  c->move_t = 500; // Default move time (can be used for animations)
-  // c->end_loc = (Vector2){200, 60}; // Default end location
+  // c->move_t = 500; // Default move time (can be used for animations)
+  //  c->end_loc = (Vector2){200, 60}; // Default end location
   c->txt_pos = (Vector2){x + 8, y + 6};
 
   return c;
@@ -50,13 +51,13 @@ Case *case_new(int number, int value, int x, int y) {
 // }
 
 // Function to check if mouse is hovering over the case
-bool is_colliding(int m_x, int m_y, Case *box) {
-  if (m_x < box->x + box->w && m_x > box->x && m_y < box->y + box->h &&
-      m_y > box->y) {
-    return true;
-  }
-  return false;
-}
+// bool is_colliding(int m_x, int m_y, Case *box) {
+//   if (m_x < box->x + box->w && m_x > box->x && m_y < box->y + box->h &&
+//       m_y > box->y) {
+//     return true;
+//   }
+//   return false;
+// }
 
 // Update function to detect hover
 void UpdateCase(Case *c, Vector2 mousePos) {
@@ -83,13 +84,16 @@ void DrawCase(Case *c) {
     // Draw the case with hover effect
     // Color current_col = c->hovered ? c->hover_col : c->col;
     if (c->selected) {
-      DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3, TEXT_BLUE);
+      DrawRectangleLinesEx(
+          (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
+          TEXT_BLUE);
       // Draw the number inside the case
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
                (int)c->txt_pos.y, 30, TEXT_BLUE);
     } else {
-      DrawRectangleLinesEx((Rectangle){c->x, c->y, c->w, c->h}, 3,
-                           c->hovered ? HOVER_COLOR : DEFAULT_COLOR);
+      DrawRectangleLinesEx(
+          (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
+          c->hovered ? HOVER_COLOR : DEFAULT_COLOR);
       // Draw the number inside the case
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
                (int)c->txt_pos.y, 30, c->hovered ? OFF_WHITE : DEFAULT_COLOR);

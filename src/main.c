@@ -16,10 +16,13 @@
 #define FPS 30
 #define BANNER_FONT_SIZE 38
 #define BANNER_SCROLL_SPEED 2
+#define MAX_BANNER_LEN 64
 
 Vector2 mousePos = (Vector2){0, 0};
 
 Player *player = NULL;
+
+const short CASES_PER_ROUND[9] = {6, 5, 4, 3, 2, 1, 1, 1, 0};
 
 Button *btn_play = NULL;
 Button *btn_accept = NULL;
@@ -32,12 +35,16 @@ int opened_case_num = 0;
 int opened_case_value = 0;
 Sound duck_sfx;
 
-typedef enum { TITLE, GAME, GAMEOVER } GameState;
+typedef enum { TITLE, PICK_CASE, OFFER, GAMEOVER } GameState;
 
-int gameRound = 0;
+short game_round = 0;
+int current_offer = 0;
+short cases_to_pick = 7;
+
 int game_state = TITLE;
 int banner_x = 0;
 char *bannerText = "";
+
 const int screenWidth = 960;
 const int screenHeight = 540;
 int playerCaseNumber = 0;
@@ -62,13 +69,17 @@ int main(void) {
   SetTraceLogLevel(LOG_ALL);
   SetExitKey(KEY_Q);
 
-  bannerText = "Select Your Case";
-
   duck_sfx = LoadSound("res/duck.ogg");
+  // char *bannerText = malloc(MAX_BANNER_LEN);
   player = calloc(1, sizeof(Player));
   game_state = TITLE;
   btn_play = button_new("Play", 300, 350, StartGame, TEXT_BLUE);
+  btn_accept = button_new("Accept", 200, 400, AcceptDeal, PT_GREEN);
+  btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED);
+
   opening_case_timer = CreateTimer();
+
+  ResetGame();
 
   // Case *cases[NUM_CASES];
   //  Create a case (e.g., number 1, value 100, position (100, 100))
@@ -76,32 +87,6 @@ int main(void) {
   // Initialize multiple cases in 4 rows and 6 columns with gaps
   // TODO: Shuffle values without changing
   // ShuffleCaseValues(case_values, NUM_CASES);
-  int indices[NUM_CASES];
-  for (int i = 0; i < NUM_CASES; i++) {
-    indices[i] = i;
-  }
-  ShuffleCaseValues(indices, NUM_CASES);
-
-  // Setting up cases
-  for (int i = 0; i < NUM_CASES; i++) {
-    // Calculate the row and column
-    int row = i / NUM_COLS; // Integer division (gives row index)
-    int col = i % NUM_COLS; // Modulo operation (gives column index)
-
-    // Calculate the x and y positions based on row and column with gaps
-    int x = 30 + (col * (CASE_WIDTH + GAP_X));  // Add GAP_X between cases
-    int y = 60 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
-
-    // Create a new case with the calculated position
-    cases[i] = case_new(i + 1, case_values[indices[i]].value, x, y);
-    cases[i]->value_index = indices[i];
-    if (!cases[i]) {
-      TraceLog(LOG_ERROR, "Failed to allocate memory for case %d", i);
-      CleanUp();
-      CloseWindow();
-      return 0;
-    }
-  }
 
   while (!WindowShouldClose()) {
     mousePos = GetMousePosition();
@@ -109,7 +94,7 @@ int main(void) {
     case TITLE:
       UpdateTitleScreen();
       break;
-    case GAME:
+    case PICK_CASE:
       UpdateGame();
       break;
     case GAMEOVER:
@@ -122,7 +107,7 @@ int main(void) {
     case TITLE:
       DrawTitleScreen();
       break;
-    case GAME:
+    case PICK_CASE:
       DrawGame();
       break;
     case GAMEOVER:
@@ -178,6 +163,35 @@ void UpdateGame() {
   }
 }
 
+void SetupCases() {
+  int indices[NUM_CASES];
+  for (int i = 0; i < NUM_CASES; i++) {
+    indices[i] = i;
+  }
+  ShuffleCaseValues(indices, NUM_CASES);
+
+  // Setting up cases
+  for (int i = 0; i < NUM_CASES; i++) {
+    // Calculate the row and column
+    int row = i / NUM_COLS; // Integer division (gives row index)
+    int col = i % NUM_COLS; // Modulo operation (gives column index)
+
+    // Calculate the x and y positions based on row and column with gaps
+    int x = 30 + (col * (CASE_WIDTH + GAP_X));  // Add GAP_X between cases
+    int y = 80 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
+
+    // Create a new case with the calculated position
+    cases[i] = case_new(i + 1, case_values[indices[i]].value, x, y);
+    cases[i]->value_index = indices[i];
+    if (!cases[i]) {
+      TraceLog(LOG_ERROR, "Failed to allocate memory for case %d", i);
+      CleanUp();
+      CloseWindow();
+      // return 0;
+    }
+  }
+}
+
 void UpdateGameOver() {
   DrawText("Game Over", 350, 200, 30, LIGHTGRAY);
   DrawText("Press ENTER to Restart", 280, 300, 20, LIGHTGRAY);
@@ -197,13 +211,13 @@ void DrawGame() {
     DrawRectangleLinesEx((Rectangle){0, 40, screenWidth - 300, screenHeight},
                          4.0f, TEXT_BLUE);
     for (int i = 0; i < 12; i++) {
-      DrawText(TextFormat("$%d", case_values[i].value), 700, 50 + (34 * i), 30,
+      DrawText(TextFormat("$%d", case_values[i].value), 700, 80 + (34 * i), 30,
                case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
     }
 
     for (int i = 12; i < 24; i++) {
       DrawText(TextFormat("$%d", case_values[i].value), 800,
-               50 + (34 * (i - 12)), 30,
+               80 + (34 * (i - 12)), 30,
                case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
     }
     // Draw all cases
@@ -227,10 +241,11 @@ void DrawOpenedCaseInfo() {
 
 void StartGame() {
   TraceLog(LOG_DEBUG, "Starting game");
-  game_state = GAME;
+  game_state = PICK_CASE;
 }
-void AcceptDeal() { TraceLog(LOG_DEBUG, "Start Game"); }
-void RejectDeal() { TraceLog(LOG_DEBUG, "Start Game"); }
+
+void AcceptDeal() { TraceLog(LOG_DEBUG, "Player accepted the deal"); }
+void RejectDeal() { TraceLog(LOG_DEBUG, "Player accepted the deal"); }
 
 void CleanUp(void) {
   for (int i = 0; i < NUM_CASES; i++) {
@@ -277,6 +292,91 @@ const char *pluralize_cases(int n) {
   }
 
   return buffer;
+}
+
+void ResetGame() {
+  UpdateBannerText(cases_to_pick);
+  // bannerText = "Select Your Case";
+  memset(player, 0, sizeof(Player));
+  memset(cases, 0, sizeof(cases));
+  SetupCases();
+  cases_to_pick = 7;
+  game_round = 0;
+}
+
+int GetOffer() {
+  int values_left = 0;
+  double sum = 0.0;
+  int lowest = 1000000;
+
+  // First pass: calculate values_left, sum, and lowest
+  for (int i = 0; i < NUM_CASES; i++) {
+    if (case_values[i].in_play) {
+      values_left++;
+      sum += case_values[i].value;
+      if (case_values[i].value < lowest) {
+        lowest = case_values[i].value;
+      }
+    }
+  }
+
+  if (values_left == 0)
+    return 0; // avoid division by zero
+
+  double off_set = 1.0 - 0.7 * ((double)values_left / NUM_CASES);
+  double initial = lowest + ((sum / values_left - lowest) * off_set);
+
+  // Second pass: find next_lower
+  int next_lower = -1;
+  for (int i = 0; i < NUM_CASES; i++) {
+    if (case_values[i].in_play) {
+      int val = case_values[i].value;
+      if (val > next_lower && val <= initial) {
+        next_lower = val;
+      }
+    }
+  }
+
+  // Final offer calculation
+  double offer =
+      next_lower * (1 - off_set * off_set) + initial * (off_set * off_set);
+  return (int)floor(offer);
+}
+
+void AdvanceRound() {
+  game_round++;
+  cases_to_pick = CASES_PER_ROUND[game_round];
+}
+
+// void UpdateBannerText(int n_cases) {
+//   char txt[64];
+//   if (playerCaseNumber != 0) {
+//     if (n_cases > 1) {
+//       snprintf(txt, sizeof(txt), "PICK %d MORE CASES", n_cases);
+//     } else {
+//       snprintf(txt, sizeof(txt), "PICK %d CASE", n_cases);
+//     }
+//   } else {
+//     snprintf(txt, sizeof(txt), "Pick yssour case");
+//   }
+
+//   bannerText = txt;
+// }
+
+void UpdateBannerText(int n_cases) {
+  static char buffer[MAX_BANNER_LEN];
+
+  if (playerCaseNumber != 0) {
+    if (n_cases > 1) {
+      snprintf(buffer, sizeof(buffer), "PICK %d MORE CASES", n_cases);
+    } else {
+      snprintf(buffer, sizeof(buffer), "PICK %d CASE", n_cases);
+    }
+  } else {
+    snprintf(buffer, sizeof(buffer), "Pick your case");
+  }
+  bannerText = buffer;
+  // return buffer; // Return pointer to static buffer
 }
 
 // // #include <string.h> // For string manipulation (e.g., strcpy, strlen)
@@ -382,7 +482,8 @@ const char *pluralize_cases(int n) {
 
 //     // Begin drawing to the real window
 //     BeginDrawing();
-//     ClearBackground(BLACK); // Clear to black to avoid letterboxing artifacts
+//     ClearBackground(BLACK); // Clear to black to avoid letterboxing
+//     artifacts
 //     // std::cout << "Mouse Position: (" << localMousePos.x << ", " <<
 //     // localMousePos.y << ")" << std::endl; Draw the scaled 128x128 game
 //     texture
@@ -416,8 +517,8 @@ const char *pluralize_cases(int n) {
  *raylib 2.5
  *
  *   Example licensed under an unmodified zlib/libpng license, which is an
- *OSI-certified, BSD-like license that allows static linking with closed source
- *software
+ *OSI-certified, BSD-like license that allows static linking with closed
+ *source software
  *
  *   Copyright (c) 2014-2024 Ramon Santamaria (@raysan5)
  *
@@ -504,7 +605,8 @@ const char *pluralize_cases(int n) {
 //       ||
 //           ((bunnies[i].position.x + texBunny.width / 2) < 0))
 //         bunnies[i].speed.x *= -1;
-//       if (((bunnies[i].position.y + texBunny.height / 2) > GetScreenHeight())
+//       if (((bunnies[i].position.y + texBunny.height / 2) >
+//       GetScreenHeight())
 //       ||
 //           ((bunnies[i].position.y + texBunny.height / 2 - 40) < 0))
 //         bunnies[i].speed.y *= -1;
@@ -525,9 +627,10 @@ const char *pluralize_cases(int n) {
 //       // buffer is send to GPU... Process of sending data is costly and it
 //       could
 //       // happen that GPU data has not been completely processed for drawing
-//       // while new data is tried to be sent (updating current in-use buffers)
-//       it
-//       // could generates a stall and consequently a frame drop, limiting the
+//       // while new data is tried to be sent (updating current in-use
+//       buffers) it
+//       // could generates a stall and consequently a frame drop, limiting
+//       the
 //       // number of drawn bunnies
 //       DrawCircleLines((int)bunnies[i].position.x,
 //       (int)bunnies[i].position.y, 8.0f, RED);

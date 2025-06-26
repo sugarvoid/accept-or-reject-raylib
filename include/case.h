@@ -2,7 +2,6 @@
 #define CASE_H
 
 #include "../include/raylib/raylib.h"
-#include "../include/rect_object.h"
 
 #define DEFAULT_COLOR (Color){88, 86, 85, 255}
 
@@ -17,18 +16,16 @@ typedef struct {
   int number;
   int value;
   Vector2 position;
-  int x, y;     // Position of the case
-  int w, h;     // Width and height of the case
-  bool hovered; // If the mouse is hovering over the case
-  bool picked;  // If the case has been selected
-  bool visible; // If the case is visible or hidden
+  // int w;
+  // int h;
+  bool hovered;
+  bool picked;
+  bool visible;
   bool interactable;
   bool opened;
   bool selected;
   int value_index;
-  Vector2 txt_pos; // Position of the text inside the case
-  int move_t;      // Animation duration for case movement (optional)
-  Vector2 end_loc; // End location (optional for animation)
+  Vector2 txt_pos;
 } Case;
 
 // Function prototypes

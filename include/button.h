@@ -2,14 +2,16 @@
 #define BUTTON_H
 
 #include "../include/raylib/raylib.h"
-#include "../include/rect_object.h"
 #include <stdbool.h>
 
+#define FONT_SPACING 1
+
 typedef struct {
-  RectObject rect;
-  char *text;         // Button text
-  int x, y;           // Position (x, y)
-  int w, h;           // Width and height
+  Rectangle rect;
+  char *text; // Button text
+  int x, y;   // Position (x, y)
+  int w, h;
+  int font_size;      // Width and height
   void (*callback)(); // Callback function when button is clicked
   Color col;          // Button color
   bool is_hovered;    // Is the button hovered by the mouse
