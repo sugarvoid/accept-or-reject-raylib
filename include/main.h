@@ -19,9 +19,10 @@
 #define PT_ORANGE (Color){255, 136, 0, 255}
 #define PT_GREEN (Color){0, 178, 81, 255}
 #define PT_RED (Color){255, 0, 77, 255}
+
 #define DEFAULT_COLOR (Color){88, 86, 85, 255}
 #define HOVER_COLOR (Color){255, 163, 0, 255}
-#define OFF_WHITE (Color){255, 241, 232, 255}
+#define PT_WHITE (Color){255, 241, 232, 255}
 
 #define SHOW_CASE_VAULE_TIME 1.0f
 #define FPS 30

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 // TODO: Replace x and y with Vector2
-Button *button_new(char *text, int x, int y, void (*callback)(), Color col) {
+Button *button_new(char *text, int x, int y, void (*callback)(), Color col, Color hover_col) {
   Button *btn = malloc(sizeof(Button));
   if (!btn) {
     return NULL;
@@ -16,6 +16,7 @@ Button *button_new(char *text, int x, int y, void (*callback)(), Color col) {
   btn->rect = (Rectangle){x, y, btn->w, btn->h};
   btn->callback = callback;
   btn->col = col;
+  btn->hovered_col = hover_col;
   btn->is_hovered = false;
   btn->txt_col = BLACK;
   btn->textSize =
@@ -39,7 +40,7 @@ void button_was_clicked(Button *btn) {
 
 void button_draw(Button *btn) {
   DrawRectangle(btn->x, btn->y, btn->w, btn->h,
-                btn->is_hovered ? GRAY : btn->col);
+                btn->is_hovered ? btn->hovered_col : btn->col);
   DrawTextEx(GetFontDefault(), btn->text, btn->textPosition, btn->font_size,
              FONT_SPACING, btn->txt_col);
 }
