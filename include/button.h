@@ -8,19 +8,20 @@
 
 typedef struct {
   Rectangle rect;
-  char *text; // Button text
-  int x, y;   // Position (x, y)
-  int w, h;
-  int font_size;      // Width and height
-  void (*callback)(); // Callback function when button is clicked
-  Color col;          // Button color
-  bool is_hovered;    // Is the button hovered by the mouse
-  Color txt_col;      // Text color
+  char *text;
+  int x;
+  int y;
+  int w;
+  int h;
+  int font_size;
+  void (*callback)();
+  Color col;
+  bool is_hovered;
+  Color txt_col;
   Vector2 textSize;
   Vector2 textPosition;
 } Button;
 
-// Function prototypes
 Button *button_new(char *text, int x, int y, void (*callback)(), Color col);
 void button_update(Button *btn, Vector2 mousePos);
 void button_was_clicked(Button *btn);

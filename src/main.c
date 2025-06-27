@@ -10,12 +10,6 @@
 #include <string.h>
 #include <time.h>
 
-#define SHOW_CASE_VAULE_TIME 1.0f
-#define FPS 30
-#define BANNER_FONT_SIZE 38
-#define BANNER_SCROLL_SPEED 2
-#define MAX_BANNER_LEN 64
-
 Vector2 mousePos = (Vector2){0, 0};
 
 Player *player = NULL;
@@ -46,11 +40,9 @@ char *bannerText = "";
 
 const int screenWidth = 960;
 const int screenHeight = 540;
-// int playerCaseNumber = 0;
 int playerCaseValue = 0;
 bool showingCaseValue = false;
 
-Timer *ballTimer = NULL;
 Timer *opening_case_timer = NULL;
 
 CaseValue case_values[24] = {
@@ -70,10 +62,9 @@ int main(void) {
   LogSomething("I passed this in");
 
   duck_sfx = LoadSound("res/duck.ogg");
-  // char *bannerText = malloc(MAX_BANNER_LEN);
   player = calloc(1, sizeof(Player));
-  game_state = TITLE;
-  btn_play = button_new("Play", 300, 350, StartGame, TEXT_BLUE);
+
+  btn_play = button_new("Play", 300, 350, StartGame, PT_BLUE);
   btn_accept = button_new("Accept", 200, 400, AcceptDeal, PT_GREEN);
   btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED);
 
@@ -140,12 +131,14 @@ void UpdateGame() {
 
     // Check if the case was clicked
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
-      if (player->CaseNum != 0) {
-        StartTimer(opening_case_timer, SHOW_CASE_VAULE_TIME);
-      }
-      PlayerPickCase(player, cases[i]);
-      if (cases[i]->value == 1000000) {
-        PlaySound(duck_sfx);
+      if (!opening_case_timer->IsRunning) {
+        if (player->CaseNum != 0) {
+          StartTimer(opening_case_timer, SHOW_CASE_VAULE_TIME);
+        }
+        PlayerPickCase(player, cases[i]);
+        if (cases[i]->value == 1000000) {
+          PlaySound(duck_sfx);
+        }
       }
     }
   }
@@ -165,8 +158,8 @@ void SetupCases() {
     int col = i % NUM_COLS; // Modulo operation (gives column index)
 
     // Calculate the x and y positions based on row and column with gaps
-    int x = 30 + (col * (CASE_WIDTH + GAP_X));  // Add GAP_X between cases
-    int y = 80 + (row * (CASE_HEIGHT + GAP_Y)); // Add GAP_Y between rows
+    int x = 30 + (col * (CASE_WIDTH + CASE_GAP_X));  // Add GAP_X between cases
+    int y = 80 + (row * (CASE_HEIGHT + CASE_GAP_Y)); // Add GAP_Y between rows
 
     // Create a new case with the calculated position
     cases[i] = case_new(i + 1, case_values[indices[i]].value, x, y);
@@ -192,21 +185,21 @@ void DrawTitleScreen() {
 
 void DrawGame() {
   if (opening_case_timer->TimeLeft <= 0) {
-    DrawText(bannerText, banner_x, 4, BANNER_FONT_SIZE, TEXT_ORANGE);
-    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 44}, 4.0f, TEXT_BLUE);
+    DrawText(bannerText, banner_x, 4, BANNER_FONT_SIZE, PT_ORANGE);
+    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 44}, 4.0f, PT_BLUE);
     DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f,
-                         TEXT_BLUE);
+                         PT_BLUE);
     DrawRectangleLinesEx((Rectangle){0, 40, screenWidth - 300, screenHeight},
-                         4.0f, TEXT_BLUE);
+                         4.0f, PT_BLUE);
     for (int i = 0; i < 12; i++) {
       DrawText(TextFormat("$%d", case_values[i].value), 700, 80 + (34 * i), 30,
-               case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
+               case_values[i].in_play ? PT_BLUE : PT_GRAY);
     }
 
     for (int i = 12; i < 24; i++) {
       DrawText(TextFormat("$%d", case_values[i].value), 800,
                80 + (34 * (i - 12)), 30,
-               case_values[i].in_play ? TEXT_BLUE : TEXT_GRAY);
+               case_values[i].in_play ? PT_BLUE : PT_GRAY);
     }
     // Draw all cases
     for (int i = 0; i < NUM_CASES; i++) {
@@ -284,7 +277,7 @@ const char *pluralize_cases(int n) {
 
 void ResetGame() {
   UpdateBannerText(cases_to_pick);
-  // bannerText = "Select Your Case";
+  game_state = TITLE;
   memset(player, 0, sizeof(Player));
   memset(cases, 0, sizeof(cases));
   SetupCases();
@@ -353,10 +346,10 @@ void UpdateBannerText(int n_cases) {
   // return buffer; // Return pointer to static buffer
 }
 
-void LogSomething(char str[]) {
+void LogMessage(char str[]) {
 
   FILE *log = NULL;
-  log = fopen("test.log", "a");
+  log = fopen("aor.log", "a");
   if (log == NULL) {
     printf("Error! can't open log file.");
   }
@@ -417,10 +410,10 @@ void DrawCase(Case *c) {
     if (c->selected) {
       DrawRectangleLinesEx(
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
-          TEXT_BLUE);
+          PT_BLUE);
       // Draw the number inside the case
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
-               (int)c->txt_pos.y, 30, TEXT_BLUE);
+               (int)c->txt_pos.y, 30, PT_BLUE);
     } else {
       DrawRectangleLinesEx(
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
