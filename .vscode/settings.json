@@ -58,6 +58,7 @@
 		"string.h": "c",
 		"case.h": "c",
 		"raymath.h": "c",
-		"globals.h": "c"
+		"globals.h": "c",
+		"stddef.h": "c"
 	}
 }

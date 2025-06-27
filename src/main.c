@@ -1,10 +1,8 @@
 #include "../include/main.h"
 #include "../include/button.h"
-#include "../include/case.h"
-#include "../include/globals.h"
 #include "../include/raylib/raylib.h"
 #include "../include/timer.h"
-// #include "../include/raylib/raymath.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -22,12 +20,13 @@ Vector2 mousePos = (Vector2){0, 0};
 
 Player *player = NULL;
 
-const short CASES_PER_ROUND[9] = {6, 5, 4, 3, 2, 1, 1, 1, 0};
+const short CASES_PER_ROUND[10] = {0, 6, 5, 4, 3, 2, 1, 1, 1, 0};
 
 Button *btn_play = NULL;
 Button *btn_accept = NULL;
 Button *btn_reject = NULL;
 
+CaseValue case_values[NUM_CASES];
 Case *cases[NUM_CASES] = {NULL};
 Case *pickedCase = NULL;
 Case *playerCase = NULL;
@@ -47,7 +46,7 @@ char *bannerText = "";
 
 const int screenWidth = 960;
 const int screenHeight = 540;
-int playerCaseNumber = 0;
+// int playerCaseNumber = 0;
 int playerCaseValue = 0;
 bool showingCaseValue = false;
 
@@ -68,6 +67,7 @@ int main(void) {
   SetTargetFPS(FPS);
   SetTraceLogLevel(LOG_ALL);
   SetExitKey(KEY_Q);
+  LogSomething("I passed this in");
 
   duck_sfx = LoadSound("res/duck.ogg");
   // char *bannerText = malloc(MAX_BANNER_LEN);
@@ -80,13 +80,6 @@ int main(void) {
   opening_case_timer = CreateTimer();
 
   ResetGame();
-
-  // Case *cases[NUM_CASES];
-  //  Create a case (e.g., number 1, value 100, position (100, 100))
-
-  // Initialize multiple cases in 4 rows and 6 columns with gaps
-  // TODO: Shuffle values without changing
-  // ShuffleCaseValues(case_values, NUM_CASES);
 
   while (!WindowShouldClose()) {
     mousePos = GetMousePosition();
@@ -117,10 +110,8 @@ int main(void) {
     EndDrawing();
   }
 
-  // De-Initialization
   CleanUp();
 
-  // Close window and OpenGL context
   CloseAudioDevice();
   CloseWindow();
   return 0;
@@ -128,9 +119,6 @@ int main(void) {
 
 void UpdateTitleScreen() {
   if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-    TraceLog(LOG_INFO, TextFormat("Mouse clicked at X: %f, Y: %f", mousePos.x,
-                                  mousePos.y));
-
     if (btn_play->is_hovered) {
       button_was_clicked(btn_play);
     }
@@ -346,27 +334,13 @@ int GetOffer() {
 void AdvanceRound() {
   game_round++;
   cases_to_pick = CASES_PER_ROUND[game_round];
+  UpdateBannerText(cases_to_pick);
 }
-
-// void UpdateBannerText(int n_cases) {
-//   char txt[64];
-//   if (playerCaseNumber != 0) {
-//     if (n_cases > 1) {
-//       snprintf(txt, sizeof(txt), "PICK %d MORE CASES", n_cases);
-//     } else {
-//       snprintf(txt, sizeof(txt), "PICK %d CASE", n_cases);
-//     }
-//   } else {
-//     snprintf(txt, sizeof(txt), "Pick yssour case");
-//   }
-
-//   bannerText = txt;
-// }
 
 void UpdateBannerText(int n_cases) {
   static char buffer[MAX_BANNER_LEN];
 
-  if (playerCaseNumber != 0) {
+  if (player->CaseNum != 0) {
     if (n_cases > 1) {
       snprintf(buffer, sizeof(buffer), "PICK %d MORE CASES", n_cases);
     } else {
@@ -378,6 +352,107 @@ void UpdateBannerText(int n_cases) {
   bannerText = buffer;
   // return buffer; // Return pointer to static buffer
 }
+
+void LogSomething(char str[]) {
+
+  FILE *log = NULL;
+  log = fopen("test.log", "a");
+  if (log == NULL) {
+    printf("Error! can't open log file.");
+  }
+  time_t t = time(NULL);
+  assert(t != ((time_t)-1)); // error handling
+  struct tm tm;
+  memset(&tm, 0, sizeof(tm));
+  assert(gmtime_r(&t, &tm) != NULL); // error handling
+  fprintf(log, "%04d-%02d-%02d %02d:%02d:%02d - %s\n", 1900 + tm.tm_year,
+          tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, str);
+  fclose(log);
+}
+
+void PlayerPickCase(Player *p, Case *c) {
+  if (p == NULL || c == NULL) {
+    // handle error
+    TraceLog(LOG_ERROR, "Something was null");
+  }
+  if (p->CaseNum == 0) {
+    c->selected = true;
+    c->hovered = false;
+    c->interactable = false;
+    p->CaseNum = c->number;
+    p->CaseVaule = c->value;
+    AdvanceRound();
+
+  } else {
+    OpenCase(c);
+  }
+}
+
+Case *case_new(int number, int value, int x, int y) {
+  Case *c = malloc(sizeof(Case));
+  if (!c)
+    return NULL;
+  c->number = number;
+  c->value = value;
+  c->rect = (Rectangle){x, y, CASE_WIDTH, CASE_HEIGHT};
+  c->position = (Vector2){x, y};
+  c->interactable = true;
+  c->selected = false;
+  c->hovered = false;
+  c->picked = false;
+  c->opened = false;
+  c->visible = true;
+  c->txt_pos = (Vector2){x + 8, y + 6};
+  return c;
+}
+
+void UpdateCase(Case *c, Vector2 mousePos) {
+  c->hovered = CheckCollisionPointRec(mousePos, c->rect);
+}
+
+void DrawCase(Case *c) {
+  if (c->visible) {
+    // Draw the case with hover effect
+    // Color current_col = c->hovered ? c->hover_col : c->col;
+    if (c->selected) {
+      DrawRectangleLinesEx(
+          (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
+          TEXT_BLUE);
+      // Draw the number inside the case
+      DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
+               (int)c->txt_pos.y, 30, TEXT_BLUE);
+    } else {
+      DrawRectangleLinesEx(
+          (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
+          c->hovered ? HOVER_COLOR : DEFAULT_COLOR);
+      // Draw the number inside the case
+      DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
+               (int)c->txt_pos.y, 30, c->hovered ? OFF_WHITE : DEFAULT_COLOR);
+    }
+  }
+}
+
+void OpenCase(Case *c) {
+  if (!c->selected) {
+    UpdateCaseDisplay(c->number, c->value);
+    // TraceLog(LOG_DEBUG, TextFormat("Case %d was clicked! Value: %d",
+    // c->number, c->value));
+    c->interactable = false;
+    c->hovered = false;
+    c->opened = true;
+    c->selected = false;
+    c->picked = true;
+    case_values[c->value_index].in_play = false;
+    c->visible = false;
+  }
+}
+
+void UpdateCaseDisplay(int case_num, int case_val) {
+  opened_case_num = case_num;
+  opened_case_value = case_val;
+}
+
+void GoToGameOver(Player *p) {}
 
 // // #include <string.h> // For string manipulation (e.g., strcpy, strlen)
 // #include <stdio.h> // For input/output (e.g., printf, scanf)
