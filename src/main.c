@@ -30,7 +30,7 @@ int opened_case_num = 0;
 int opened_case_value = 0;
 Sound duck_sfx;
 
-typedef enum { TITLE, PICK_CASE, OFFER, GAMEOVER } GameState;
+typedef enum { TITLE, PICK_CASE, DISPLAY_CASE, OFFER, GAMEOVER } GameState;
 
 short game_round = 0;
 int current_offer = 0;
@@ -67,15 +67,15 @@ int main(void) {
   player = calloc(1, sizeof(Player));
 
   btn_play = button_new("Play", 400, 350, StartGame, PT_BLUE, PT_GRAY);
-  btn_accept = button_new("Accept", 200, 400, AcceptDeal, PT_GREEN,PT_GRAY);
-  btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED,PT_GRAY);
+  btn_accept = button_new("Accept", 200, 400, AcceptDeal, PT_GREEN, PT_GRAY);
+  btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED, PT_GRAY);
 
   opening_case_timer = CreateTimer();
 
   ResetGame();
 
   while (!WindowShouldClose()) {
-    //mousePos = GetMousePosition();
+    // mousePos = GetMousePosition();
     switch (game_state) {
     case TITLE:
       UpdateTitleScreen();
@@ -159,7 +159,7 @@ void SetupCases() {
     int col = i % NUM_COLS; // Modulo operation (gives column index)
 
     // Calculate the x and y positions based on row and column with gaps
-    int x = 30 + (col * (CASE_WIDTH + CASE_GAP_X));  
+    int x = 30 + (col * (CASE_WIDTH + CASE_GAP_X));
     int y = 80 + (row * (CASE_HEIGHT + CASE_GAP_Y));
 
     // Create a new case with the calculated position
@@ -225,9 +225,9 @@ void StartGame() {
   game_state = PICK_CASE;
 }
 
-void AcceptDeal() { 
-  TraceLog(LOG_DEBUG, "Player accepted the deal"); 
-  wasOfferAccepted = true; 
+void AcceptDeal() {
+  TraceLog(LOG_DEBUG, "Player accepted the deal");
+  wasOfferAccepted = true;
 }
 void RejectDeal() { TraceLog(LOG_DEBUG, "Player accepted the deal"); }
 
@@ -383,7 +383,7 @@ void PlayerPickCase(Player *p, Case *c) {
 
 Case *case_new(int number, int value, int x, int y) {
   Case *c = malloc(sizeof(Case));
-  if (!c){
+  if (!c) {
     return NULL;
   }
   c->number = number;
@@ -411,10 +411,10 @@ void DrawCase(Case *c) {
     if (c->selected) {
       DrawRectangleLinesEx(
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
-          PT_BLUE);
+          Fade(PT_BLUE, 0.5f));
       // Draw the number inside the case
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
-               (int)c->txt_pos.y, 30, PT_BLUE);
+               (int)c->txt_pos.y, 30, Fade(PT_BLUE, 0.5f));
     } else {
       DrawRectangleLinesEx(
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
@@ -448,6 +448,4 @@ void UpdateCaseDisplay(int case_num, int case_val) {
   opened_case_value = case_val;
 }
 
-void GoToGameOver(Player *p) {
-
-}
+void GoToGameOver(Player *p) {}
