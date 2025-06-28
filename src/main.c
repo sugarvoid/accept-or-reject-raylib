@@ -1,7 +1,6 @@
 #include "../include/main.h"
 #include "../include/button.h"
 #include "../include/raylib/raylib.h"
-#include "../include/timer.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -12,7 +11,10 @@
 
 Vector2 mousePos = (Vector2){0, 0};
 
-Player *player = NULL;
+// Player *player = NULL;
+
+int player_case_num;
+int player_case_value;
 
 const short CASES_PER_ROUND[10] = {0, 6, 5, 4, 3, 2, 1, 1, 1, 0};
 
@@ -46,7 +48,7 @@ int playerCaseValue = 0;
 bool is_case_opening = false;
 
 int case_timer = 90;
-Timer *opening_case_timer = NULL;
+// Timer *opening_case_timer = NULL;
 
 CaseValue case_values[24] = {
     {1, true},      {3, true},      {5, true},      {10, true},
@@ -65,13 +67,12 @@ int main(void) {
   LogMessage("I passed this in");
 
   duck_sfx = LoadSound("res/duck.ogg");
-  player = calloc(1, sizeof(Player));
 
   btn_play = button_new("Play", 400, 350, StartGame, PT_BLUE, PT_GRAY);
   btn_accept = button_new("Accept", 200, 400, AcceptDeal, PT_GREEN, PT_GRAY);
   btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED, PT_GRAY);
 
-  opening_case_timer = CreateTimer();
+  // opening_case_timer = CreateTimer();
 
   ResetGame();
 
@@ -127,7 +128,7 @@ void UpdateTitleScreen() {
 
 void UpdateGame() {
   UpdateBanner();
-  UpdateTimer(opening_case_timer);
+  // UpdateTimer(opening_case_timer);
   if (case_timer < 90) {
     case_timer++;
   }
@@ -152,17 +153,18 @@ void UpdateGame() {
     if (cases[i]->interactable) {
       UpdateCase(cases[i], GetMousePosition());
     }
-
-    // Check if the case was clicked
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
-      if (!opening_case_timer->IsRunning) {
-        if (player->CaseNum != 0) {
+    // Make sure player can't keep clicking after opening case
+    if (!is_case_opening) {
+      if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
+        // if (!is_case_opening) {
+        if (player_case_num != 0) {
           // StartTimer(opening_case_timer, SHOW_CASE_VAULE_TIME);
         }
-        PlayerPickCase(player, cases[i]);
+        PlayerPickCase(cases[i]);
         if (cases[i]->value == 1000000) {
           PlaySound(duck_sfx);
         }
+        //}
       }
     }
   }
@@ -253,12 +255,12 @@ void DrawLines() {
 void DrawDollarAmounts() {
   for (int i = 0; i < 12; i++) {
     DrawText(TextFormat("$%d", case_values[i].value), 700, 80 + (34 * i), 30,
-             case_values[i].in_play ? PT_BLUE : PT_GRAY);
+             case_values[i].in_play ? PT_BLUE : Fade(PT_GRAY, 0.4f));
   }
 
   for (int i = 12; i < 24; i++) {
     DrawText(TextFormat("$%d", case_values[i].value), 800, 80 + (34 * (i - 12)),
-             30, case_values[i].in_play ? PT_BLUE : PT_GRAY);
+             30, case_values[i].in_play ? PT_BLUE : Fade(PT_GRAY, 0.4f));
   }
 }
 
@@ -308,7 +310,6 @@ void CleanUp(void) {
   free(btn_play);
   free(btn_accept);
   free(btn_reject);
-  free(player);
   UnloadSound(duck_sfx);
 }
 
@@ -351,7 +352,8 @@ void ResetGame() {
   UpdateBannerText(cases_to_pick);
   game_state = TITLE;
   wasOfferAccepted = false;
-  memset(player, 0, sizeof(Player));
+  player_case_num = 0;
+  player_case_value = 0;
   memset(cases, 0, sizeof(cases));
   SetupCases();
   cases_to_pick = 7;
@@ -409,7 +411,7 @@ void UpdateBannerText(int n_cases) {
     return;
   }
 
-  if (player->CaseNum != 0) {
+  if (player_case_num != 0) {
     if (n_cases > 1) {
       snprintf(buffer, sizeof(buffer), "PICK %d MORE CASES", n_cases);
     } else {
@@ -439,17 +441,16 @@ void LogMessage(char str[]) {
   fclose(log);
 }
 
-void PlayerPickCase(Player *p, Case *c) {
-  if (p == NULL || c == NULL) {
-    // handle error
-    TraceLog(LOG_ERROR, "Something was null");
+void PlayerPickCase(Case *c) {
+  if (c == NULL) {
+    TraceLog(LOG_ERROR, "Case is null");
   }
-  if (p->CaseNum == 0) {
+  if (player_case_num == 0) {
     c->selected = true;
     c->hovered = false;
     c->interactable = false;
-    p->CaseNum = c->number;
-    p->CaseVaule = c->value;
+    player_case_num = c->number;
+    player_case_value = c->value;
     AdvanceRound();
 
   } else {
@@ -526,4 +527,4 @@ void UpdateCaseDisplay(int case_num, int case_val) {
   opened_case_value = case_val;
 }
 
-void GoToGameOver(Player *p) {}
+void GoToGameOver() {}

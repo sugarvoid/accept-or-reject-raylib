@@ -35,10 +35,10 @@ typedef struct {
   bool in_play;
 } CaseValue;
 
-typedef struct Player {
-  int CaseNum;
-  int CaseVaule;
-} Player;
+// typedef struct Player {
+//   int CaseNum;
+//   int CaseVaule;
+// } Player;
 
 typedef struct {
   Rectangle rect;
@@ -66,7 +66,7 @@ void UpdateGame(void);
 void UpdateGameOver(void);
 void UpdateOffer(void);
 
-void PlayerPickCase(Player *p, Case *c);
+void PlayerPickCase(Case *c);
 
 void DrawTitleScreen(void);
 void DrawGame(void);
@@ -98,7 +98,7 @@ void DrawOpenedCaseInfo();
 void ShuffleCaseValues(int *array, size_t n);
 Sound LoadSoundSafe(const char *filename);
 
-void GoToGameOver(Player *p);
+void GoToGameOver();
 void LogMessage(char str[]);
 
 void CleanUp(void);
