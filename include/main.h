@@ -25,7 +25,7 @@
 #define PT_WHITE (Color){255, 241, 232, 255}
 
 #define SHOW_CASE_VAULE_TIME 1.0f
-#define FPS 30
+#define FPS 60
 #define BANNER_FONT_SIZE 38
 #define BANNER_SCROLL_SPEED 2
 #define MAX_BANNER_LEN 64
@@ -64,15 +64,20 @@ void UpdateCaseDisplay(int case_num, int case_val);
 void UpdateTitleScreen(void);
 void UpdateGame(void);
 void UpdateGameOver(void);
+void UpdateOffer(void);
 
 void PlayerPickCase(Player *p, Case *c);
 
 void DrawTitleScreen(void);
 void DrawGame(void);
 void DrawGameOver(void);
+void DrawOffer(void);
 
 void DrawCaseValue(Case *Case);
 const char *pluralize_cases(int n);
+
+void DrawDollarAmounts(void);
+void DrawLines(void);
 
 void StartGame(void);
 void AcceptDeal(void);
@@ -82,6 +87,9 @@ void SetupCases(void);
 
 void AdvanceRound(void);
 int GetOffer(void);
+
+void UpdateBanner(void);
+void DrawBanner(void);
 void UpdateBannerText(int n_cases);
 
 // void UpdateCaseDisplay(int case_num, int case_val);

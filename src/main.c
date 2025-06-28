@@ -43,8 +43,9 @@ char *bannerText = "";
 const int screenWidth = 960;
 const int screenHeight = 540;
 int playerCaseValue = 0;
-bool showingCaseValue = false;
+bool is_case_opening = false;
 
+int case_timer = 90;
 Timer *opening_case_timer = NULL;
 
 CaseValue case_values[24] = {
@@ -83,6 +84,9 @@ int main(void) {
     case PICK_CASE:
       UpdateGame();
       break;
+    case OFFER:
+      UpdateOffer();
+      break;
     case GAMEOVER:
       break;
     }
@@ -95,6 +99,9 @@ int main(void) {
       break;
     case PICK_CASE:
       DrawGame();
+      break;
+    case OFFER:
+      DrawOffer();
       break;
     case GAMEOVER:
       DrawGameOver();
@@ -119,11 +126,27 @@ void UpdateTitleScreen() {
 }
 
 void UpdateGame() {
+  UpdateBanner();
   UpdateTimer(opening_case_timer);
-  banner_x += 2;
-  if (banner_x >= screenWidth) {
-    banner_x = -MeasureText(bannerText, 38);
+  if (case_timer < 90) {
+    case_timer++;
   }
+  if (case_timer >= 90) {
+    if (cases_to_pick == 0 && game_round <= 8) {
+      game_state = OFFER;
+      is_case_opening = false;
+      UpdateBannerText(99);
+      current_offer = GetOffer();
+    } else {
+      if (game_round <= 8) {
+        game_state = PICK_CASE;
+      } else if (game_round == 9) {
+        game_state = GAMEOVER;
+      }
+    }
+  }
+  is_case_opening = case_timer < 80;
+
   // Update each case
   for (int i = 0; i < NUM_CASES; i++) {
     if (cases[i]->interactable) {
@@ -134,7 +157,7 @@ void UpdateGame() {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
       if (!opening_case_timer->IsRunning) {
         if (player->CaseNum != 0) {
-          StartTimer(opening_case_timer, SHOW_CASE_VAULE_TIME);
+          // StartTimer(opening_case_timer, SHOW_CASE_VAULE_TIME);
         }
         PlayerPickCase(player, cases[i]);
         if (cases[i]->value == 1000000) {
@@ -143,6 +166,20 @@ void UpdateGame() {
       }
     }
   }
+}
+
+void UpdateBanner() {
+  banner_x += 2;
+  if (banner_x >= screenWidth) {
+    banner_x = -MeasureText(bannerText, 38);
+  }
+}
+
+void UpdateOffer() {
+  UpdateBanner();
+  Vector2 mousePos = GetMousePosition();
+  button_update(btn_accept, mousePos);
+  button_update(btn_reject, mousePos);
 }
 
 void SetupCases() {
@@ -184,30 +221,63 @@ void DrawTitleScreen() {
 }
 
 void DrawGame() {
-  if (opening_case_timer->TimeLeft <= 0) {
-    DrawText(bannerText, banner_x, 4, BANNER_FONT_SIZE, PT_ORANGE);
-    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 44}, 4.0f, PT_BLUE);
-    DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f,
-                         PT_BLUE);
-    DrawRectangleLinesEx((Rectangle){0, 40, screenWidth - 300, screenHeight},
-                         4.0f, PT_BLUE);
-    for (int i = 0; i < 12; i++) {
-      DrawText(TextFormat("$%d", case_values[i].value), 700, 80 + (34 * i), 30,
-               case_values[i].in_play ? PT_BLUE : PT_GRAY);
-    }
+  // if (opening_case_timer->TimeLeft <= 0) {
+  if (case_timer < 90) {
+    DrawOpenedCaseInfo();
 
-    for (int i = 12; i < 24; i++) {
-      DrawText(TextFormat("$%d", case_values[i].value), 800,
-               80 + (34 * (i - 12)), 30,
-               case_values[i].in_play ? PT_BLUE : PT_GRAY);
-    }
+  } else {
+    DrawBanner();
+
+    DrawLines();
+    DrawDollarAmounts();
     // Draw all cases
     for (int i = 0; i < NUM_CASES; i++) {
       DrawCase(cases[i]);
     }
-  } else {
-    DrawOpenedCaseInfo();
   }
+}
+
+// TODO: Rename to DrawMarqee
+void DrawBanner() {
+  DrawText(bannerText, banner_x, 4, BANNER_FONT_SIZE, PT_ORANGE);
+}
+
+void DrawLines() {
+  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 44}, 4.0f, PT_BLUE);
+  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f,
+                       PT_BLUE);
+  DrawRectangleLinesEx((Rectangle){0, 40, screenWidth - 300, screenHeight},
+                       4.0f, PT_BLUE);
+}
+
+void DrawDollarAmounts() {
+  for (int i = 0; i < 12; i++) {
+    DrawText(TextFormat("$%d", case_values[i].value), 700, 80 + (34 * i), 30,
+             case_values[i].in_play ? PT_BLUE : PT_GRAY);
+  }
+
+  for (int i = 12; i < 24; i++) {
+    DrawText(TextFormat("$%d", case_values[i].value), 800, 80 + (34 * (i - 12)),
+             30, case_values[i].in_play ? PT_BLUE : PT_GRAY);
+  }
+}
+
+void DrawOffer() {
+  DrawBanner();
+  if (game_round == 7) {
+    DrawText("Last Offer", 10, 60, 30, PT_ORANGE);
+  } else {
+    DrawText(TextFormat("Next Round\n %s",
+                        pluralize_cases(CASES_PER_ROUND[game_round + 1])),
+             10, 50, 30, PT_ORANGE);
+  }
+  DrawLines();
+  DrawDollarAmounts();
+  DrawText("Offer", 350, 200, 30, PT_WHITE);
+  DrawLine(340, 220, 420, 220, PT_WHITE);
+  DrawText(TextFormat("$ %d", GetOffer()), 350, 370, 30, PT_WHITE);
+  button_draw(btn_accept);
+  button_draw(btn_reject);
 }
 
 void DrawGameOver() {
@@ -333,6 +403,12 @@ void AdvanceRound() {
 void UpdateBannerText(int n_cases) {
   static char buffer[MAX_BANNER_LEN];
 
+  // FIXME: Do better?
+  if (n_cases == 99) {
+    bannerText = "Banker's Offer";
+    return;
+  }
+
   if (player->CaseNum != 0) {
     if (n_cases > 1) {
       snprintf(buffer, sizeof(buffer), "PICK %d MORE CASES", n_cases);
@@ -427,9 +503,11 @@ void DrawCase(Case *c) {
 }
 
 void OpenCase(Case *c) {
+  TraceLog(LOG_INFO, TextFormat("Case %d was opened", c->number));
   if (!c->selected) {
+    case_timer = 0;
     UpdateCaseDisplay(c->number, c->value);
-    cases_to_pick--;
+    Clamp(cases_to_pick--, 0, 10);
     UpdateBannerText(cases_to_pick);
     // TraceLog(LOG_DEBUG, TextFormat("Case %d was clicked! Value: %d",
     // c->number, c->value));
