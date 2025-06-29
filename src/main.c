@@ -21,6 +21,7 @@ const short CASES_PER_ROUND[10] = {0, 6, 5, 4, 3, 2, 1, 1, 1, 0};
 Button *btn_play = NULL;
 Button *btn_accept = NULL;
 Button *btn_reject = NULL;
+Button *btn_retrun = NULL;
 
 bool wasOfferAccepted = false;
 
@@ -32,7 +33,7 @@ int opened_case_num = 0;
 int opened_case_value = 0;
 Sound duck_sfx;
 
-typedef enum { TITLE, PICK_CASE, DISPLAY_CASE, OFFER, GAMEOVER } GameState;
+enum GameState { TITLE, PICK_CASE, DISPLAY_CASE, OFFER, GAMEOVER };
 
 short game_round = 0;
 int current_offer = 0;
@@ -68,9 +69,10 @@ int main(void) {
 
   duck_sfx = LoadSound("res/duck.ogg");
 
-  btn_play = button_new("Play", 400, 350, StartGame, PT_BLUE, PT_GRAY);
+  btn_play = button_new("Play", 400, 370, StartGame, PT_BLUE, PT_GRAY);
   btn_accept = button_new("Accept", 200, 400, AcceptDeal, PT_GREEN, PT_GRAY);
   btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED, PT_GRAY);
+  btn_retrun = button_new("Main", 500, 450, BackToMain, PT_BLUE, PT_GRAY);
 
   // opening_case_timer = CreateTimer();
 
@@ -89,6 +91,7 @@ int main(void) {
       UpdateOffer();
       break;
     case GAMEOVER:
+      UpdateGameOver();
       break;
     }
 
@@ -115,6 +118,13 @@ int main(void) {
   CloseAudioDevice();
   CloseWindow();
   return 0;
+}
+
+void BackToMain() {
+  game_state = TITLE;
+
+  // TODO: Do I need this??
+  ResetGame();
 }
 
 void UpdateTitleScreen() {
@@ -179,6 +189,14 @@ void UpdateBanner() {
 
 void UpdateOffer() {
   UpdateBanner();
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (btn_accept->is_hovered) {
+      button_was_clicked(btn_accept);
+    }
+    if (btn_reject->is_hovered) {
+      button_was_clicked(btn_reject);
+    }
+  }
   Vector2 mousePos = GetMousePosition();
   button_update(btn_accept, mousePos);
   button_update(btn_reject, mousePos);
@@ -193,6 +211,7 @@ void SetupCases() {
 
   // Setting up cases
   for (int i = 0; i < NUM_CASES; i++) {
+    case_values[i].in_play = true;
     // Calculate the row and column
     int row = i / NUM_COLS; // Integer division (gives row index)
     int col = i % NUM_COLS; // Modulo operation (gives column index)
@@ -213,8 +232,12 @@ void SetupCases() {
 }
 
 void UpdateGameOver() {
-  DrawText("Game Over", 350, 200, 30, PT_WHITE);
-  DrawText("Press ENTER to Restart", 280, 300, 20, PT_WHITE);
+  if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    if (btn_retrun->is_hovered) {
+      button_was_clicked(btn_retrun);
+    }
+  }
+  button_update(btn_retrun, GetMousePosition());
 }
 
 void DrawTitleScreen() {
@@ -276,15 +299,25 @@ void DrawOffer() {
   DrawLines();
   DrawDollarAmounts();
   DrawText("Offer", 350, 200, 30, PT_WHITE);
-  DrawLine(340, 220, 420, 220, PT_WHITE);
-  DrawText(TextFormat("$ %d", GetOffer()), 350, 370, 30, PT_WHITE);
+  DrawLine(340, 230, 420, 230, PT_WHITE);
+  DrawText(TextFormat("$ %d", GetOffer()), 350, 300, 30, PT_WHITE);
   button_draw(btn_accept);
   button_draw(btn_reject);
 }
 
 void DrawGameOver() {
-  DrawText("Game Over", 350, 200, 30, PT_WHITE);
-  DrawText("Press ENTER to Restart", 280, 300, 20, PT_WHITE);
+  if (wasOfferAccepted) {
+    DrawText("Offer Accepted:", 350, 200, 30, PT_WHITE);
+    DrawText(TextFormat("%d", current_offer), 350, 250, 30, PT_WHITE);
+
+    DrawText("Your case had:", 280, 400, 20, PT_WHITE);
+    DrawText(TextFormat("%d", player_case_value), 280, 450, 20, PT_WHITE);
+  } else {
+    DrawText("Your case had:", 280, 400, 20, PT_WHITE);
+    DrawText(TextFormat("%d", player_case_value), 280, 450, 20, PT_WHITE);
+  }
+
+  button_draw(btn_retrun);
 }
 
 void DrawOpenedCaseInfo() {
@@ -300,8 +333,12 @@ void StartGame() {
 void AcceptDeal() {
   TraceLog(LOG_DEBUG, "Player accepted the deal");
   wasOfferAccepted = true;
+  GoToGameOver();
 }
-void RejectDeal() { TraceLog(LOG_DEBUG, "Player accepted the deal"); }
+void RejectDeal() {
+  TraceLog(LOG_DEBUG, "Player refused the deal");
+  AdvanceRound();
+}
 
 void CleanUp(void) {
   for (int i = 0; i < NUM_CASES; i++) {
@@ -349,7 +386,7 @@ const char *pluralize_cases(int n) {
 }
 
 void ResetGame() {
-  UpdateBannerText(cases_to_pick);
+
   game_state = TITLE;
   wasOfferAccepted = false;
   player_case_num = 0;
@@ -358,6 +395,7 @@ void ResetGame() {
   SetupCases();
   cases_to_pick = 7;
   game_round = 0;
+  UpdateBannerText(cases_to_pick);
 }
 
 int GetOffer() {
@@ -400,12 +438,13 @@ void AdvanceRound() {
   game_round++;
   cases_to_pick = CASES_PER_ROUND[game_round];
   UpdateBannerText(cases_to_pick);
+  game_state = PICK_CASE;
 }
 
 void UpdateBannerText(int n_cases) {
   static char buffer[MAX_BANNER_LEN];
 
-  // FIXME: Do better?
+  // FIXME: Find better way to set banner for banker's offer
   if (n_cases == 99) {
     bannerText = "Banker's Offer";
     return;
@@ -413,9 +452,9 @@ void UpdateBannerText(int n_cases) {
 
   if (player_case_num != 0) {
     if (n_cases > 1) {
-      snprintf(buffer, sizeof(buffer), "PICK %d MORE CASES", n_cases);
+      snprintf(buffer, sizeof(buffer), "Open %d more cases", n_cases);
     } else {
-      snprintf(buffer, sizeof(buffer), "PICK %d CASE", n_cases);
+      snprintf(buffer, sizeof(buffer), "Open %d case", n_cases);
     }
   } else {
     snprintf(buffer, sizeof(buffer), "Pick your case");
@@ -495,8 +534,7 @@ void DrawCase(Case *c) {
     } else {
       DrawRectangleLinesEx(
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
-          c->hovered ? HOVER_COLOR : DEFAULT_COLOR);
-      // Draw the number inside the case
+          c->hovered ? PT_ORANGE : DEFAULT_COLOR);
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
                (int)c->txt_pos.y, 30, c->hovered ? PT_WHITE : DEFAULT_COLOR);
     }
@@ -527,4 +565,4 @@ void UpdateCaseDisplay(int case_num, int case_val) {
   opened_case_value = case_val;
 }
 
-void GoToGameOver() {}
+void GoToGameOver() { game_state = GAMEOVER; }

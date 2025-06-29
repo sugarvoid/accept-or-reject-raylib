@@ -2,7 +2,9 @@
 #include <stdlib.h>
 
 // TODO: Replace x and y with Vector2
-Button *button_new(char *text, int x, int y, void (*callback)(), Color col, Color hover_col) {
+// TODO: Switch to camel case for functions
+Button *button_new(char *text, int x, int y, void (*callback)(), Color col,
+                   Color hover_col) {
   Button *btn = malloc(sizeof(Button));
   if (!btn) {
     return NULL;
@@ -27,14 +29,12 @@ Button *button_new(char *text, int x, int y, void (*callback)(), Color col, Colo
 }
 
 void button_update(Button *b, Vector2 mousePos) {
-  // b->is_hovered = is_mouse_colliding(mousePos, &b->rect);
   b->is_hovered = CheckCollisionPointRec(mousePos, b->rect);
 }
 
 void button_was_clicked(Button *btn) {
   if (btn->callback) {
     btn->callback();
-    TraceLog(LOG_INFO, "button clicked");
   }
 }
 

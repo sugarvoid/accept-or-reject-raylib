@@ -2,16 +2,16 @@
 
 # Define variables for the compiler and flags
 CC=gcc
-COMPILER_FLAGS="-O2 -Wall -Wno-missing-braces"
-# With box2d ### LINKER_FLAGS="-L./lib/ -lraylib -lbox2d -lGL -lm -lpthread -ldl -lrt -lX11"
-LINKER_FLAGS="-L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11"
+COMPILER_FLAGS="-O2 -Wall -Wno-missing-braces -std=gnu99"
+LINKER_FLAGS="-L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11" # -lbox2d
+
 # Define the target executable
 TARGET="accept-reject"
 
 # Define the output folder for binaries
 BIN_DIR="bin"
 
-# Automatically get all .c files in the src directory
+# Get all .c files in the src directory
 SRCS=$(find src -name "*.c")
 
 # Generate object file names from source files
@@ -20,7 +20,7 @@ for src in $SRCS; do
     OBJS="$OBJS ${src/.c/.o}"
 done
 
-# Function to compile source files into object files
+# Compile source files into object files
 compile() {
     for src in $SRCS; do
         echo "Compiling $src..."
@@ -28,44 +28,42 @@ compile() {
     done
 }
 
-# Function to link object files into the target executable
+# Link object files into the target executable
 link() {
     echo "Linking $TARGET..."
     $CC $OBJS $COMPILER_FLAGS $LINKER_FLAGS -o "bin/$TARGET"
 }
 
-# Function to clean up build artifacts
+# Clean up build artifacts
 clean() {
     echo "Cleaning up..."
     rm -f $OBJS $TARGET
     rm -rf $BIN_DIR/*
 }
 
-# Function to rebuild (clean and build)
 rebuild() {
     clean
     build
 }
 
-# Function to build the project (native)
+
 build() {
     compile
     link
 }
 
-# Function to run the executable
+# Run the executable
 run() {
     echo "Running $TARGET..."
     ./"bin/"$TARGET
 }
 
-# Function to rebuild and run the executable
 rebuild_and_run() {
     rebuild
     run
 }
 
-# Function to create a release build
+# Create a linux release build
 release() {
     echo "Creating release build..."
 

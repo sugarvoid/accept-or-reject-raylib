@@ -73,6 +73,8 @@ void DrawGame(void);
 void DrawGameOver(void);
 void DrawOffer(void);
 
+void BackToMain(void);
+
 void DrawCaseValue(Case *Case);
 const char *pluralize_cases(int n);
 
@@ -93,12 +95,12 @@ void DrawBanner(void);
 void UpdateBannerText(int n_cases);
 
 // void UpdateCaseDisplay(int case_num, int case_val);
-void DrawOpenedCaseInfo();
+void DrawOpenedCaseInfo(void);
 
 void ShuffleCaseValues(int *array, size_t n);
 Sound LoadSoundSafe(const char *filename);
 
-void GoToGameOver();
+void GoToGameOver(void);
 void LogMessage(char str[]);
 
 void CleanUp(void);
