@@ -48,7 +48,8 @@ const int screenHeight = 540;
 int playerCaseValue = 0;
 bool is_case_opening = false;
 
-int case_timer = 90;
+
+int case_timer = OPEN_CASE_TIME;
 // Timer *opening_case_timer = NULL;
 
 CaseValue case_values[24] = {
@@ -72,7 +73,7 @@ int main(void) {
   btn_play = button_new("Play", 400, 370, StartGame, PT_BLUE, PT_GRAY);
   btn_accept = button_new("Accept", 200, 400, AcceptDeal, PT_GREEN, PT_GRAY);
   btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED, PT_GRAY);
-  btn_retrun = button_new("Main", 500, 450, BackToMain, PT_BLUE, PT_GRAY);
+  btn_retrun = button_new("Main", 400, 450, BackToMain, PT_BLUE, PT_GRAY);
 
   // opening_case_timer = CreateTimer();
 
@@ -139,10 +140,10 @@ void UpdateTitleScreen() {
 void UpdateGame() {
   UpdateBanner();
   // UpdateTimer(opening_case_timer);
-  if (case_timer < 90) {
+  if (case_timer < OPEN_CASE_TIME) {
     case_timer++;
   }
-  if (case_timer >= 90) {
+  if (case_timer >= OPEN_CASE_TIME) {
     if (cases_to_pick == 0 && game_round <= 8) {
       game_state = OFFER;
       is_case_opening = false;
@@ -156,7 +157,7 @@ void UpdateGame() {
       }
     }
   }
-  is_case_opening = case_timer < 80;
+  is_case_opening = case_timer < OPEN_CASE_TIME - 10;
 
   // Update each case
   for (int i = 0; i < NUM_CASES; i++) {
@@ -247,7 +248,7 @@ void DrawTitleScreen() {
 
 void DrawGame() {
   // if (opening_case_timer->TimeLeft <= 0) {
-  if (case_timer < 90) {
+  if (case_timer < OPEN_CASE_TIME) {
     DrawOpenedCaseInfo();
 
   } else {
@@ -308,13 +309,13 @@ void DrawOffer() {
 void DrawGameOver() {
   if (wasOfferAccepted) {
     DrawText("Offer Accepted:", 350, 200, 30, PT_WHITE);
-    DrawText(TextFormat("%d", current_offer), 350, 250, 30, PT_WHITE);
+    DrawText(TextFormat("$ %d", current_offer), 350, 250, 30, PT_WHITE);
 
-    DrawText("Your case had:", 280, 400, 20, PT_WHITE);
-    DrawText(TextFormat("%d", player_case_value), 280, 450, 20, PT_WHITE);
+    DrawText("Your case had:", 350, 300, 30, PT_WHITE);
+    DrawText(TextFormat("$ %d", player_case_value), 350, 350, 30, PT_WHITE);
   } else {
-    DrawText("Your case had:", 280, 400, 20, PT_WHITE);
-    DrawText(TextFormat("%d", player_case_value), 280, 450, 20, PT_WHITE);
+    DrawText("Your case had:", 350, 300, 30, PT_WHITE);
+    DrawText(TextFormat("$ %d", player_case_value), 350, 350, 30, PT_WHITE);
   }
 
   button_draw(btn_retrun);
@@ -341,7 +342,11 @@ void AcceptDeal() {
 }
 void RejectDeal() {
   TraceLog(LOG_DEBUG, "Player refused the deal");
-  AdvanceRound();
+  if (game_round < 7) {
+    AdvanceRound();
+  } else {
+    GoToGameOver();
+  }
 }
 
 void CleanUp(void) {
@@ -442,7 +447,9 @@ void AdvanceRound() {
   game_round++;
   cases_to_pick = CASES_PER_ROUND[game_round];
   UpdateBannerText(cases_to_pick);
-  game_state = PICK_CASE;
+  if (game_round < 9) {
+    game_state = PICK_CASE;
+  }
 }
 
 void UpdateBannerText(int n_cases) {

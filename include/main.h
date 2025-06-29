@@ -14,6 +14,8 @@
 #define CASE_WIDTH 90
 #define CASE_HEIGHT 60
 
+#define OPEN_CASE_TIME 90
+
 #define PT_BLUE (Color){41, 173, 255, 255}
 #define PT_GRAY (Color){95, 87, 79, 255}
 #define PT_ORANGE (Color){255, 136, 0, 255}
