@@ -11,7 +11,7 @@ typedef struct {
   bool IsDone;
 } Timer;
 
-Timer *CreateTimer();
+Timer *CreateTimer(void);
 void StartTimer(Timer *timer, float lifetime);
 void UpdateTimer(Timer *timer);
 

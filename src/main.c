@@ -292,7 +292,7 @@ void DrawOffer() {
   if (game_round == 7) {
     DrawText("Last Offer", 10, 60, 30, PT_ORANGE);
   } else {
-    DrawText(TextFormat("Next Round\n %s",
+    DrawText(TextFormat("Next Round\n%s",
                         pluralize_cases(CASES_PER_ROUND[game_round + 1])),
              10, 50, 30, PT_ORANGE);
   }
@@ -321,8 +321,12 @@ void DrawGameOver() {
 }
 
 void DrawOpenedCaseInfo() {
-  DrawText(TextFormat("Case %d had", opened_case_num), 350, 200, 30, PT_WHITE);
-  DrawText(TextFormat("$ %d", opened_case_value), 280, 300, 40, PT_WHITE);
+  const char *line_1 = TextFormat("Case %d had", opened_case_num);
+  const char *line_2 = TextFormat("$ %d", opened_case_value);
+  DrawText(line_1, (screenWidth / 2) - (MeasureText(line_1, 40) / 2), 200, 40,
+           PT_WHITE);
+  DrawText(line_2, (screenWidth / 2) - (MeasureText(line_2, 40) / 2), 260, 40,
+           PT_WHITE);
 }
 
 void StartGame() {
