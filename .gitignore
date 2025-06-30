@@ -28,7 +28,7 @@ _deps
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+# *.dll
 
 # Fortran module files
 *.mod
@@ -37,7 +37,7 @@ _deps
 # Compiled Static libraries
 *.lai
 *.la
-*.a
+# *.a
 *.lib
 
 # Executables
@@ -53,6 +53,7 @@ build/
 
 game
 
-
+!raylib_win/bin/*
+!raylib_win/lib/*
 !lib/
 !lib/*a

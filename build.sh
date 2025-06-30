@@ -5,6 +5,16 @@ CC=gcc
 COMPILER_FLAGS="-O2 -Wall -Wno-missing-braces -std=gnu99"
 LINKER_FLAGS="-L./lib/ -lraylib -lGL -lm -lpthread -ldl -lrt -lX11" # -lbox2d
 
+# Windows cross-compilation using DLL
+WIN_CC=x86_64-w64-mingw32-gcc
+RAYLIB_INCLUDE=include
+WIN_RAYLIB_LIB=raylib_win
+WIN_DLL="raylib_win/raylib.dll"  # path to the actual DLL
+
+# You must have raylib.dll.a in the lib folder
+WIN_LINKER_FLAGS="-L$WIN_RAYLIB_LIB -lraylib -lopengl32 -lgdi32 -lwinmm"
+
+
 # Define the target executable
 TARGET="accept-reject"
 
@@ -63,8 +73,44 @@ rebuild_and_run() {
     run
 }
 
+windows() {
+    echo "Cross-compiling for Windows (DLL)..."
+    echo "Cleaning previous Windows build artifacts..."
+    rm -f src/*.win.o
+    rm -f "$BIN_DIR/$TARGET.exe"
+
+    mkdir -p $BIN_DIR
+
+    # Compile source files
+    for src in $SRCS; do
+        echo "Compiling $src..."
+        $WIN_CC -c $src -o ${src/.c/.win.o} -I$RAYLIB_INCLUDE
+    done
+
+    # Gather object files
+    WIN_OBJS=""
+    for src in $SRCS; do
+        WIN_OBJS="$WIN_OBJS ${src/.c/.win.o}"
+    done
+
+    # Link object files into Windows .exe
+    $WIN_CC $WIN_OBJS $WIN_LINKER_FLAGS -o "$BIN_DIR/$TARGET.exe"
+
+    # Copy the assets (resource folder) into the bin directory
+    cp -r res "$BIN_DIR/"
+
+
+    # Copy raylib.dll to the bin folder
+    cp "$WIN_DLL" "$BIN_DIR/"
+
+    echo "Windows build complete:"
+    echo "  - EXE: $BIN_DIR/$TARGET.exe"
+    echo "  - DLL: $BIN_DIR/raylib.dll"
+}
+
+
 # Create a linux release build
-release() {
+linux() {
     echo "Creating release build..."
 
     # Clean the previous build artifacts
@@ -100,11 +146,14 @@ case "$1" in
     "run")
         run
         ;;
-    "release")
+    "linux")
         clean
-        release
+        linux
+        ;;
+    "windows")
+        windows
         ;;
     *)
-        rebuild_and_run
+        linux
         ;;
 esac

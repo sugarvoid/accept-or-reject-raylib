@@ -9,6 +9,14 @@
 #include <string.h>
 #include <time.h>
 
+#if defined(_WIN32) || defined(_WIN64)
+// Define gmtime_r in terms of Windows gmtime_s
+static struct tm *gmtime_r(const time_t *timep, struct tm *result) {
+  // gmtime_s returns 0 on success
+  return (gmtime_s(result, timep) == 0) ? result : NULL;
+}
+#endif
+
 Vector2 mousePos = (Vector2){0, 0};
 
 // Player *player = NULL;
@@ -48,7 +56,6 @@ const int screenHeight = 540;
 int playerCaseValue = 0;
 bool is_case_opening = false;
 
-
 int case_timer = OPEN_CASE_TIME;
 // Timer *opening_case_timer = NULL;
 
@@ -66,7 +73,6 @@ int main(void) {
   SetTargetFPS(FPS);
   SetTraceLogLevel(LOG_ALL);
   SetExitKey(KEY_Q);
-  LogMessage("I passed this in");
 
   duck_sfx = LoadSound("res/duck.ogg");
 
