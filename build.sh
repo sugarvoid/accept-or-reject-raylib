@@ -133,6 +133,7 @@ linux() {
     cp -r res $RELEASE_DIR/
 
     echo "Release build complete: $RELEASE_DIR/"
+    run
 }
 
 # Main logic to clean, rebuild, and run when no argument is provided
@@ -149,6 +150,7 @@ case "$1" in
     "linux")
         clean
         linux
+        run
         ;;
     "windows")
         windows

@@ -13,20 +13,20 @@
 #define CASE_GAP_Y 15
 #define CASE_WIDTH 90
 #define CASE_HEIGHT 60
+#define LINE_THICKNESS 4.0f
 
-#define OPEN_CASE_TIME 90
+#define SCREEN_WIDTH 960
+#define SCREEN_HEIGHT 540
+
+#define OPEN_CASE_TIME 70
 
 #define PT_BLUE (Color){41, 173, 255, 255}
 #define PT_GRAY (Color){95, 87, 79, 255}
 #define PT_ORANGE (Color){255, 136, 0, 255}
 #define PT_GREEN (Color){0, 178, 81, 255}
 #define PT_RED (Color){255, 0, 77, 255}
-
-#define DEFAULT_COLOR (Color){88, 86, 85, 255}
-#define HOVER_COLOR (Color){255, 163, 0, 255}
 #define PT_WHITE (Color){255, 241, 232, 255}
 
-#define SHOW_CASE_VAULE_TIME 1.0f
 #define FPS 60
 #define BANNER_FONT_SIZE 38
 #define BANNER_SCROLL_SPEED 2
@@ -36,11 +36,6 @@ typedef struct {
   int value;
   bool in_play;
 } CaseValue;
-
-// typedef struct Player {
-//   int CaseNum;
-//   int CaseVaule;
-// } Player;
 
 typedef struct {
   Rectangle rect;
@@ -61,23 +56,24 @@ Case *case_new(int number, int value, int x, int y);
 void UpdateCase(Case *c, Vector2 mousePos);
 void DrawCase(Case *c);
 void OpenCase(Case *c);
+
+void UpdateGame(void);
 void UpdateCaseDisplay(int case_num, int case_val);
 
-void UpdateTitleScreen(void);
-void UpdateGame(void);
-void UpdateGameOver(void);
 void UpdateOffer(void);
+
+void UpdateGameOver(void);
+void DrawGameOver(void);
 
 void PlayerPickCase(Case *c);
 
+void UpdateTitleScreen(void);
 void DrawTitleScreen(void);
 void DrawGame(void);
-void DrawGameOver(void);
 void DrawOffer(void);
 
 void BackToMain(void);
 
-void DrawCaseValue(Case *Case);
 const char *pluralize_cases(int n);
 
 void DrawDollarAmounts(void);
@@ -96,7 +92,6 @@ void UpdateBanner(void);
 void DrawBanner(void);
 void UpdateBannerText(int n_cases);
 
-// void UpdateCaseDisplay(int case_num, int case_val);
 void DrawOpenedCaseInfo(void);
 
 void ShuffleCaseValues(int *array, size_t n);

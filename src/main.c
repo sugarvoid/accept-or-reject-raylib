@@ -17,47 +17,36 @@ static struct tm *gmtime_r(const time_t *timep, struct tm *result) {
 }
 #endif
 
-Vector2 mousePos = (Vector2){0, 0};
-
-// Player *player = NULL;
+CaseValue case_values[NUM_CASES];
+Case *cases[NUM_CASES] = {NULL};
+int case_timer = OPEN_CASE_TIME;
 
 int player_case_num;
 int player_case_value;
-
+int opened_case_num = 0;
+int opened_case_value = 0;
 const short CASES_PER_ROUND[10] = {0, 6, 5, 4, 3, 2, 1, 1, 1, 0};
+bool is_case_opening = false;
 
 Button *btn_play = NULL;
 Button *btn_accept = NULL;
 Button *btn_reject = NULL;
 Button *btn_retrun = NULL;
 
-bool wasOfferAccepted = false;
+bool was_offer_accepted = false;
 
-CaseValue case_values[NUM_CASES];
-Case *cases[NUM_CASES] = {NULL};
-Case *pickedCase = NULL;
-Case *playerCase = NULL;
-int opened_case_num = 0;
-int opened_case_value = 0;
 Sound duck_sfx;
 
 enum GameState { TITLE, PICK_CASE, DISPLAY_CASE, OFFER, GAMEOVER };
 
+int game_state = TITLE;
 short game_round = 0;
 int current_offer = 0;
 short cases_to_pick = 7;
-
-int game_state = TITLE;
 int banner_x = 0;
-char *bannerText = "";
-
-const int screenWidth = 960;
-const int screenHeight = 540;
-int playerCaseValue = 0;
-bool is_case_opening = false;
-
-int case_timer = OPEN_CASE_TIME;
-// Timer *opening_case_timer = NULL;
+char *banner_text = "";
+// const int SCREEN_WIDTH = 960;
+// const int SCREEN_HEIGHT = 540;
 
 CaseValue case_values[24] = {
     {1, true},      {3, true},      {5, true},      {10, true},
@@ -68,7 +57,7 @@ CaseValue case_values[24] = {
     {300000, true}, {500000, true}, {750000, true}, {1000000, true}};
 
 int main(void) {
-  InitWindow(screenWidth, screenHeight, "Accept Or Reject");
+  InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Accept Or Reject");
   InitAudioDevice();
   SetTargetFPS(FPS);
   SetTraceLogLevel(LOG_ALL);
@@ -81,12 +70,9 @@ int main(void) {
   btn_reject = button_new("Reject", 400, 400, RejectDeal, PT_RED, PT_GRAY);
   btn_retrun = button_new("Main", 400, 450, BackToMain, PT_BLUE, PT_GRAY);
 
-  // opening_case_timer = CreateTimer();
-
   ResetGame();
 
   while (!WindowShouldClose()) {
-    // mousePos = GetMousePosition();
     switch (game_state) {
     case TITLE:
       UpdateTitleScreen();
@@ -129,8 +115,6 @@ int main(void) {
 
 void BackToMain() {
   game_state = TITLE;
-
-  // TODO: Do I need this??
   ResetGame();
 }
 
@@ -145,7 +129,6 @@ void UpdateTitleScreen() {
 
 void UpdateGame() {
   UpdateBanner();
-  // UpdateTimer(opening_case_timer);
   if (case_timer < OPEN_CASE_TIME) {
     case_timer++;
   }
@@ -173,15 +156,10 @@ void UpdateGame() {
     // Make sure player can't keep clicking after opening case
     if (!is_case_opening) {
       if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && cases[i]->hovered) {
-        // if (!is_case_opening) {
-        if (player_case_num != 0) {
-          // StartTimer(opening_case_timer, SHOW_CASE_VAULE_TIME);
-        }
         PlayerPickCase(cases[i]);
         if (cases[i]->value == 1000000) {
           PlaySound(duck_sfx);
         }
-        //}
       }
     }
   }
@@ -189,8 +167,8 @@ void UpdateGame() {
 
 void UpdateBanner() {
   banner_x += 2;
-  if (banner_x >= screenWidth) {
-    banner_x = -MeasureText(bannerText, 38);
+  if (banner_x >= SCREEN_WIDTH) {
+    banner_x = -MeasureText(banner_text, 38);
   }
 }
 
@@ -227,7 +205,7 @@ void SetupCases() {
     int x = 30 + (col * (CASE_WIDTH + CASE_GAP_X));
     int y = 80 + (row * (CASE_HEIGHT + CASE_GAP_Y));
 
-    // Create a new case with the calculated position
+    // Create case
     cases[i] = case_new(i + 1, case_values[indices[i]].value, x, y);
     cases[i]->value_index = indices[i];
     if (!cases[i]) {
@@ -253,33 +231,30 @@ void DrawTitleScreen() {
 }
 
 void DrawGame() {
-  // if (opening_case_timer->TimeLeft <= 0) {
   if (case_timer < OPEN_CASE_TIME) {
     DrawOpenedCaseInfo();
-
   } else {
     DrawBanner();
-
     DrawLines();
     DrawDollarAmounts();
-    // Draw all cases
     for (int i = 0; i < NUM_CASES; i++) {
       DrawCase(cases[i]);
     }
   }
 }
 
-// TODO: Rename to DrawMarqee
+// TODO: Rename to DrawMarquee
 void DrawBanner() {
-  DrawText(bannerText, banner_x, 4, BANNER_FONT_SIZE, PT_ORANGE);
+  DrawText(banner_text, banner_x, 4, BANNER_FONT_SIZE, PT_ORANGE);
 }
 
 void DrawLines() {
-  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, 44}, 4.0f, PT_BLUE);
-  DrawRectangleLinesEx((Rectangle){0, 0, screenWidth, screenHeight}, 4.0f,
+  DrawRectangleLinesEx((Rectangle){0, 0, SCREEN_WIDTH, 44}, LINE_THICKNESS,
                        PT_BLUE);
-  DrawRectangleLinesEx((Rectangle){0, 40, screenWidth - 300, screenHeight},
-                       4.0f, PT_BLUE);
+  DrawRectangleLinesEx((Rectangle){0, 0, SCREEN_WIDTH, SCREEN_HEIGHT},
+                       LINE_THICKNESS, PT_BLUE);
+  DrawRectangleLinesEx((Rectangle){0, 40, SCREEN_WIDTH - 300, SCREEN_HEIGHT},
+                       LINE_THICKNESS, PT_BLUE);
 }
 
 void DrawDollarAmounts() {
@@ -313,7 +288,7 @@ void DrawOffer() {
 }
 
 void DrawGameOver() {
-  if (wasOfferAccepted) {
+  if (was_offer_accepted) {
     DrawText("Offer Accepted:", 350, 200, 30, PT_WHITE);
     DrawText(TextFormat("$ %d", current_offer), 350, 250, 30, PT_WHITE);
 
@@ -330,24 +305,26 @@ void DrawGameOver() {
 void DrawOpenedCaseInfo() {
   const char *line_1 = TextFormat("Case %d had", opened_case_num);
   const char *line_2 = TextFormat("$ %d", opened_case_value);
-  DrawText(line_1, (screenWidth / 2) - (MeasureText(line_1, 40) / 2), 200, 40,
+  DrawText(line_1, (SCREEN_WIDTH / 2) - (MeasureText(line_1, 40) / 2), 200, 40,
            PT_WHITE);
-  DrawText(line_2, (screenWidth / 2) - (MeasureText(line_2, 40) / 2), 260, 40,
+  DrawText(line_2, (SCREEN_WIDTH / 2) - (MeasureText(line_2, 40) / 2), 260, 40,
            PT_WHITE);
 }
 
 void StartGame() {
-  TraceLog(LOG_DEBUG, "Starting game");
+  TraceLog(LOG_DEBUG, "Starting game...");
   game_state = PICK_CASE;
 }
 
 void AcceptDeal() {
-  TraceLog(LOG_DEBUG, "Player accepted the deal");
-  wasOfferAccepted = true;
+  TraceLog(LOG_DEBUG,
+           TextFormat("Player accepted the deal of %d", current_offer));
+  was_offer_accepted = true;
   GoToGameOver();
 }
 void RejectDeal() {
-  TraceLog(LOG_DEBUG, "Player refused the deal");
+  TraceLog(LOG_DEBUG,
+           TextFormat("Player refused the deal of %d", current_offer));
   if (game_round < 7) {
     AdvanceRound();
   } else {
@@ -386,8 +363,6 @@ Sound LoadSoundSafe(const char *filename) {
   return sound;
 }
 
-void DrawCaseValue(Case *c) {}
-
 const char *pluralize_cases(int n) {
   static char buffer[32];
 
@@ -401,9 +376,8 @@ const char *pluralize_cases(int n) {
 }
 
 void ResetGame() {
-
   game_state = TITLE;
-  wasOfferAccepted = false;
+  was_offer_accepted = false;
   player_case_num = 0;
   player_case_value = 0;
   memset(cases, 0, sizeof(cases));
@@ -463,7 +437,7 @@ void UpdateBannerText(int n_cases) {
 
   // FIXME: Find better way to set banner for banker's offer
   if (n_cases == 99) {
-    bannerText = "Banker's Offer";
+    banner_text = "Banker's Offer";
     return;
   }
 
@@ -476,12 +450,11 @@ void UpdateBannerText(int n_cases) {
   } else {
     snprintf(buffer, sizeof(buffer), "Pick your case");
   }
-  bannerText = buffer;
+  banner_text = buffer;
   // return buffer; // Return pointer to static buffer
 }
 
 void LogMessage(char str[]) {
-
   FILE *log = NULL;
   log = fopen("aor.log", "a");
   if (log == NULL) {
@@ -539,34 +512,30 @@ void UpdateCase(Case *c, Vector2 mousePos) {
 
 void DrawCase(Case *c) {
   if (c->visible) {
-    // Draw the case with hover effect
-    // Color current_col = c->hovered ? c->hover_col : c->col;
     if (c->selected) {
       DrawRectangleLinesEx(
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
           Fade(PT_BLUE, 0.5f));
-      // Draw the number inside the case
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
                (int)c->txt_pos.y, 30, Fade(PT_BLUE, 0.5f));
     } else {
       DrawRectangleLinesEx(
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
-          c->hovered ? PT_ORANGE : DEFAULT_COLOR);
+          c->hovered ? PT_ORANGE : PT_GRAY);
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
-               (int)c->txt_pos.y, 30, c->hovered ? PT_WHITE : DEFAULT_COLOR);
+               (int)c->txt_pos.y, 30, c->hovered ? PT_WHITE : PT_GRAY);
     }
   }
 }
 
 void OpenCase(Case *c) {
-  TraceLog(LOG_INFO, TextFormat("Case %d was opened", c->number));
+  TraceLog(LOG_INFO,
+           TextFormat("Case %d was opened. Had $%d", c->number, c->value));
   if (!c->selected) {
     case_timer = 0;
     UpdateCaseDisplay(c->number, c->value);
     Clamp(cases_to_pick--, 0, 10);
     UpdateBannerText(cases_to_pick);
-    // TraceLog(LOG_DEBUG, TextFormat("Case %d was clicked! Value: %d",
-    // c->number, c->value));
     c->interactable = false;
     c->hovered = false;
     c->opened = true;
