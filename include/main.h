@@ -21,7 +21,8 @@
 #define OPEN_CASE_TIME 70
 
 #define PT_BLUE (Color){41, 173, 255, 255}
-#define PT_GRAY (Color){95, 87, 79, 255}
+#define PT_GRAY (Color){194, 195, 199, 255}
+#define PT_DARKGRAY (Color){95, 87, 79, 255}
 #define PT_ORANGE (Color){255, 136, 0, 255}
 #define PT_GREEN (Color){0, 178, 81, 255}
 #define PT_RED (Color){255, 0, 77, 255}

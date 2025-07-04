@@ -523,7 +523,7 @@ void DrawCase(Case *c) {
           (Rectangle){c->position.x, c->position.y, CASE_WIDTH, CASE_HEIGHT}, 3,
           c->hovered ? PT_ORANGE : PT_GRAY);
       DrawText(TextFormat("%d", c->number), (int)c->txt_pos.x,
-               (int)c->txt_pos.y, 30, c->hovered ? PT_WHITE : PT_GRAY);
+               (int)c->txt_pos.y, 30, c->hovered ? PT_ORANGE : PT_GRAY);
     }
   }
 }
